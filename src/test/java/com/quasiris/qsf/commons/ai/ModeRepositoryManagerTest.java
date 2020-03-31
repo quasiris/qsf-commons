@@ -24,6 +24,7 @@ public class ModeRepositoryManagerTest {
         assertEquals("https://models.quasiris.de/models/", modelRepositoryManager.getModelBaseUrl());
         assertEquals("/path/to/models/", modelRepositoryManager.getModelBasePath());
         assertEquals("/path/to/models/com/quasiris/qsf/test-model/1.2.3/", modelRepositoryManager.getAbsoluteModelPath());
+        assertEquals("/path/to/models/com/quasiris/qsf/test-model/1.2.3/test-model-1.2.3/", modelRepositoryManager.getAbsoluteModelFile());
         assertEquals("/path/to/models/com/quasiris/qsf/test-model/1.2.3/test-model-1.2.3/my-model.bin", modelRepositoryManager.getAbsoluteModelFile("my-model.bin"));
         assertEquals("https://models.quasiris.de/models/com/quasiris/qsf/test-model/1.2.3/test-model-1.2.3.zip", modelRepositoryManager.getModelUrl());
         assertEquals("/path/to/models/com/quasiris/qsf/test-model/1.2.3/test-model-1.2.3.zip", modelRepositoryManager.getZipFile());

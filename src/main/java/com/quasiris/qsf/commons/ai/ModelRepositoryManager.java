@@ -106,7 +106,7 @@ public class ModelRepositoryManager {
     }
 
     protected boolean isInstalled() {
-        Path path = Paths.get(getAbsoluteModelPath());
+        Path path = Paths.get(getAbsoluteModelFile());
         return Files.exists(path)
                 && Files.isReadable(path)
                 && Files.isWritable(path);
@@ -130,8 +130,12 @@ public class ModelRepositoryManager {
         return modelBasePath + getUrlPath();
     }
 
-    protected String getAbsoluteModelFile(String fileName) {
-        return modelBasePath + getUrlPath()  + getModelName() + "/" + fileName;
+    public String getAbsoluteModelFile() {
+        return modelBasePath + getUrlPath()  + getModelName() + "/";
+    }
+
+    public String getAbsoluteModelFile(String fileName) {
+        return getAbsoluteModelFile() + fileName;
     }
 
     protected String getUploadUrl() {

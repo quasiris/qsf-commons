@@ -1,0 +1,11 @@
+xtra los, xtra-und los, xtraundlos, xtra und-los, xtra-und-los => xtra-und-los
+mobileprozessor, mobil prozessor, mobile-prozessor => mobile-prozessor
+festnetz rufnumm, festnetzrufnumm, festnetz-rufnumm => festnetz-rufnumm
+frizzbox, fritzbos, fritz-box, avm, avmfritzbox, fritzbox, fritz box => fritz-box
+octa core-prozessor, octa-cor prozessor, octa-core-prozessor, octacoreprozessor, octa cor prozessor => octa-core-prozessor
+octa-core-mobil prozessor, octa-cor mobile-prozessor, octa cor mobile-prozessor, octa core-mobil prozessor, octa cor mobil prozessor, octacoremobileprozessor, octa core-mobile-prozessor, octa-core-mobile-prozessor, octa-cor mobil prozessor => octa-core-mobile-prozessor
+bluetooth-musik-und-anrufsteuerung, bluetooth musik und-anrufsteuerung, bluetooth-musik anrufsteuerung, bluetooth musik-und anrufsteuerung, bluetoothmusikundanrufsteuerung, bluetooth musik anrufsteuerung, bluetooth musik-und-anrufsteuerung, bluetooth-musik-und anrufsteuerung, bluetooth-musik und-anrufsteuerung => bluetooth-musik-und-anrufsteuerung
+i-phon, i phon, iphon => i-phon
+smart-phon, smartphon, smart phon => smart-phon
+oktober-dezemb, oktoberdezemb, oktob dezemb => oktober-dezemb
+alt gerat, alt-gerat, altgerat => alt-gerat

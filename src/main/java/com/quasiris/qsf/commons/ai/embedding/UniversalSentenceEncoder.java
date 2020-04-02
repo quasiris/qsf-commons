@@ -3,11 +3,15 @@ package com.quasiris.qsf.commons.ai.embedding;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quasiris.qsf.commons.ai.dto.Document;
 import com.quasiris.qsf.commons.ai.dto.TextVector;
+import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
+import com.quasiris.qsf.commons.exception.NormalizerNotSupportedException;
 import com.quasiris.qsf.commons.nlp.SentenceSplitter;
 import com.quasiris.qsf.commons.text.TextSplitter;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 import com.quasiris.qsf.commons.util.EmbeddingUtil;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -95,6 +99,16 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
         }
 
         return textVectors;
+    }
+
+    @Override
+    public TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException {
+        throw new NotImplementedException("This method supported yet!");
+    }
+
+    @Override
+    public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException {
+        throw new NotImplementedException("This method supported yet!");
     }
 
     private HttpEntity buildEntity(String text) throws JsonProcessingException {

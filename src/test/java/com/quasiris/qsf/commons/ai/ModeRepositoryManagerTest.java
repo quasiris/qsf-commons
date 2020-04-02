@@ -5,7 +5,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class ModeRepositoryManagerTest {
-
+    @Test
+    public void parsePathFromModelname() {
+        assertEquals("com/quasiris/qsc/embedding/2.0.1/embedding-2.0.1", ModelRepositoryManager.resolvePath("com.quasiris.qsc|embedding|2.0.1"));
+        assertEquals("/mnt/models/com/quasiris/qsc/embedding/2.0.1/embedding-2.0.1/model/german-stopwords.txt", ModelRepositoryManager.resolvePath("com.quasiris.qsc|embedding|2.0.1", "/mnt/models/com.quasiris.qsc|embedding|2.0.1/model/german-stopwords.txt"));
+        assertEquals("/mnt/models/com/quasiris/embedding-2020-test/2.0.1/embedding-2020-test-2.0.1/model/german-stopwords.txt", ModelRepositoryManager.resolvePath("com.quasiris|embedding-2020-test|2.0.1", "/mnt/models/com.quasiris|embedding-2020-test|2.0.1/model/german-stopwords.txt"));
+    }
 
     @Test
     public void testPathNamesAndUrl() {

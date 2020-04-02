@@ -1,6 +1,7 @@
 package com.quasiris.qsf.commons.ai;
 
 import com.quasiris.qsf.commons.util.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -46,6 +47,30 @@ public class ModelRepositoryManager {
         return getUrlPath() + getModelName() + ".zip";
     }
 
+    public static String resolvePath(String modelname, String path) {
+        if(StringUtils.isNotBlank(modelname) && StringUtils.isNotBlank(path)) {
+            String relativeModelPath = resolvePath(modelname);
+            path = path.replace(modelname, relativeModelPath);
+        }
+        return path;
+    }
+
+    public static String resolvePath(String modelname) {
+        String path = null;
+        if(StringUtils.isNotBlank(modelname)) {
+            String[] parts = modelname.split("\\|");
+            if(parts.length == 3) {
+                parts[0] = parts[0].replaceAll("\\.", File.separator);
+                String artifact = parts[1]+"-"+parts[2];
+                path = String.join(File.separator, parts);
+                path = String.join(File.separator, path, artifact);
+            } else {
+                throw new RuntimeException("Invalid Modelname: "+modelname);
+            }
+        }
+
+        return path;
+    }
 
     protected String getUrlPath() {
         StringBuilder groupIdPath = new StringBuilder(groupId.replaceAll(Pattern.quote("."), "/"));

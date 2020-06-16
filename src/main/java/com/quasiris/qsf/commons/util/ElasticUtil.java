@@ -22,4 +22,11 @@ public class ElasticUtil {
         }
         return value;
     }
+
+
+    public static String value2FieldName(String value) {
+        value = value.toLowerCase();
+        value = value.replaceAll("[^a-z0-9]", "_");
+        return value;
+    }
 }

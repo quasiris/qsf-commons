@@ -19,7 +19,7 @@ public interface TextEmbeddingEncoder {
      * @param normalizer profile. No normalizatin will be performed if empty
      * @param autosplit split text if true
      * @return list or empty list
-     * @throws NormalizerNotSupportedException
+     * @throws NormalizerNotSupportedException if not supported
      */
     List<TextVector> embed(String text, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 
@@ -29,7 +29,7 @@ public interface TextEmbeddingEncoder {
      * @param normalizer profile. No normalizatin will be performed if empty
      * @param autosplit split text if true
      * @return vectorized document
-     * @throws NormalizerNotSupportedException
+     * @throws NormalizerNotSupportedException if not supported
      */
     TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 
@@ -39,7 +39,7 @@ public interface TextEmbeddingEncoder {
      * @param normalizer profile. No normalizatin will be performed if empty
      * @param autosplit split text if true
      * @return vectorized documents
-     * @throws NormalizerNotSupportedException
+     * @throws NormalizerNotSupportedException if not supported
      */
     List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 }

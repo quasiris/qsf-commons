@@ -44,4 +44,17 @@ public class TextUtils {
     public static boolean containsNumber( String value ) {
         return NUMBER_PATTERN.matcher(value).find();
     }
+
+
+    public static boolean containsLetter(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if(Character.isLetter(c)) {
+                return true;
+            }
+
+        }
+        return false;
+
+    }
 }

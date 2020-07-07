@@ -12,6 +12,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -55,19 +56,22 @@ public class TextNormalizerService {
         }
     }
 
-    public String normalize(String text) {
-        String result = text;
-        if(StringUtils.isNotEmpty(result)) {
-            try {
-                List<String> tokens = analyze(text, analyzer);
-                if(tokens != null) {
-                    result = StringUtils.join(tokens, " ");
-                }
-            } catch (IOException ignored) {
-            }
+    public List<String> normalizeToken(String text) {
+        if(StringUtils.isEmpty(text)) {
+            return Collections.emptyList();
         }
+        try {
+            List<String> tokens = analyze(text, analyzer);
+            return tokens;
+        } catch (IOException ignored) {
+            // ignore exception
+            return Collections.emptyList();
+        }
+    }
 
-        return result;
+    public String normalize(String text) {
+        List<String> tokens = normalizeToken(text);
+        return String.join(" ", tokens);
     }
 
     public static String normalizeWhitespace(String text) {

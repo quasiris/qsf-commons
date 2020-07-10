@@ -39,6 +39,11 @@ public class NormalizerConfig {
      */
     private boolean keepPunctuation;
 
+    /**
+     * Whether to remove numbers like 8, 8.0 or 8,0
+     */
+    private boolean removeNumbers;
+
     public String getId() {
         return id;
     }
@@ -93,5 +98,13 @@ public class NormalizerConfig {
 
     public void setKeepPunctuation(boolean keepPunctuation) {
         this.keepPunctuation = keepPunctuation;
+    }
+
+    public boolean isRemoveNumbers() {
+        return removeNumbers;
+    }
+
+    public void setRemoveNumbers(boolean removeNumbers) {
+        this.removeNumbers = removeNumbers;
     }
 }

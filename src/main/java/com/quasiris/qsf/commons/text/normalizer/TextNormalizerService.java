@@ -30,8 +30,11 @@ public class TextNormalizerService {
                     .addCharFilter("patternReplace", "pattern", "(\\w+)[.|!]{1}(\\w+)", "replacement", "$1-$2") // replace Fritz!Box or Fritz.Box to Fritz-Box
                     .addCharFilter(HTMLStripCharFilterFactory.class)
                     .addCharFilter("patternReplace", "pattern", "\\b(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", "replacement", " ") // remove urls
-                    .addCharFilter("patternReplace", "pattern", enabledCharsRegex, "replacement", " ")
-                    .addCharFilter("patternReplace", "pattern", "(?<=[\\s])-(?=[\\s])|(?<=[\\S])-(?=[\\s])|(?<=[\\s])-(?=[\\S])", "replacement", " ") // remove hyphen between whitespaces
+                    .addCharFilter("patternReplace", "pattern", enabledCharsRegex, "replacement", " ");
+            if(config.isRemoveNumbers()) {
+                builder.addCharFilter("patternReplace", "pattern", "\\b(\\d+[.,-/]?\\d*?)\\b", "replacement", " ");
+            }
+            builder.addCharFilter("patternReplace", "pattern", "(?<=[\\s])-(?=[\\s])|(?<=[\\S])-(?=[\\s])|(?<=[\\s])-(?=[\\S])", "replacement", " ") // remove hyphen between whitespaces
                     .addCharFilter("patternReplace", "pattern", "\\b((?:[\\w|ÄÖÜäöüß]{1}[-!._]{1})+[\\w|ÄÖÜäöüß]{1})\\b", "replacement", " "); // remove abbreviations
             if(config.isNormalizeUmlaut()) {
                 builder.addCharFilter(MappingCharFilterFactory.class, "mapping", "normalizer/umlaute-mapping.txt");

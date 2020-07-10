@@ -15,23 +15,33 @@ public class TextNormalizerServiceTest {
     public void setUp() throws Exception {
         textNormalizers = new HashMap<>();
 
-        NormalizerConfig normalizerConfigSearch = new NormalizerConfig();
-        normalizerConfigSearch.setId("vector_search");
-        normalizerConfigSearch.setStopwordFilepath("german-stopwords.txt");
-        normalizerConfigSearch.setSynonymsFilepath("synonyms.txt");
-        normalizerConfigSearch.setStem(true);
-        normalizerConfigSearch.setNormalizeUmlaut(false);
-        normalizerConfigSearch.setRemoveDuplicates(true);
-        normalizerConfigSearch.setKeepPunctuation(false);
+        NormalizerConfig normalizerConfigSearch = createNormalizerConfigSearch();
         textNormalizers.put(normalizerConfigSearch.getId(), new TextNormalizerService(normalizerConfigSearch));
 
-        NormalizerConfig normalizerConfigBert = new NormalizerConfig();
-        normalizerConfigBert.setId("bert_universal");
-        normalizerConfigBert.setStem(false);
-        normalizerConfigBert.setNormalizeUmlaut(true);
-        normalizerConfigBert.setRemoveDuplicates(false);
-        normalizerConfigBert.setKeepPunctuation(true);
+        NormalizerConfig normalizerConfigBert = createNormalizerConfigBert();
         textNormalizers.put(normalizerConfigBert.getId(), new TextNormalizerService(normalizerConfigBert));
+    }
+
+    private NormalizerConfig createNormalizerConfigSearch() {
+        NormalizerConfig normalizerConfig = new NormalizerConfig();
+        normalizerConfig.setId("vector_search");
+        normalizerConfig.setStopwordFilepath("german-stopwords.txt");
+        normalizerConfig.setSynonymsFilepath("synonyms.txt");
+        normalizerConfig.setStem(true);
+        normalizerConfig.setNormalizeUmlaut(false);
+        normalizerConfig.setRemoveDuplicates(true);
+        normalizerConfig.setKeepPunctuation(false);
+        return normalizerConfig;
+    }
+
+    private NormalizerConfig createNormalizerConfigBert() {
+        NormalizerConfig normalizerConfig = new NormalizerConfig();
+        normalizerConfig.setId("bert_universal");
+        normalizerConfig.setStem(false);
+        normalizerConfig.setNormalizeUmlaut(true);
+        normalizerConfig.setRemoveDuplicates(false);
+        normalizerConfig.setKeepPunctuation(true);
+        return normalizerConfig;
     }
 
     @Test
@@ -63,6 +73,17 @@ public class TextNormalizerServiceTest {
     @Test
     public void removeEscapedNewlines() {
         assertEquals("hello world whats-up open", textNormalizers.get("vector_search").normalize("  Hello   \\n  \\r\\n der World- - -whats-up?   <a href>open</a>"));
+    }
+
+    @Test
+    public void removeNumbers() {
+        // given
+        NormalizerConfig normalizerConfigSearch = createNormalizerConfigSearch();
+        normalizerConfigSearch.setRemoveNumbers(true);
+        TextNormalizerService vectorSearch = new TextNormalizerService(normalizerConfigSearch);
+
+        // then
+        assertEquals("10s s10 gib i-phon vertrag samsung s10 8s model f123v", vectorSearch.normalize("10s S10 Gib mir das Iphone 8 für 29.99 oder 29,99 mit vertrag oder das samsung s10 oder 8s oder das model f123v"));
     }
 
     @Test

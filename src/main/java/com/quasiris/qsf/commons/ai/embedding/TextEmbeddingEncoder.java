@@ -34,6 +34,15 @@ public interface TextEmbeddingEncoder {
     TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 
     /**
+     * Embed fields from single doc into vector. Autosplit is disabled here.
+     * @param doc that should be embedded
+     * @param normalizer profile. No normalizatin will be performed if empty
+     * @return vectorized documents
+     * @throws NormalizerNotSupportedException if not supported
+     */
+    TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException;
+
+    /**
      * Embed docs into vector
      * @param docs that should be embedded
      * @param normalizer profile. No normalizatin will be performed if empty

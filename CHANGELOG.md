@@ -3,7 +3,7 @@ All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
 ### Added
-
+- add embedDoc method
 
 ## [0.2] - 2020-07-13
 ### Added

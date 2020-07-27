@@ -1,9 +1,10 @@
 package com.quasiris.qsf.commons.ai.dto;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Document<T> {
+public class Document<T> implements Serializable {
     private String id;
     private Map<String, T> fields = new LinkedHashMap<>();
 

@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quasiris.qsf.commons.ai.dto.Document;
 import com.quasiris.qsf.commons.ai.dto.TextVector;
 import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
+import com.quasiris.qsf.commons.exception.NormalizerNotSupportedException;
 import com.quasiris.qsf.commons.nlp.SentenceSplitter;
 import com.quasiris.qsf.commons.text.TextSplitter;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -121,6 +123,11 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
             vectorDoc = vectorDocs.get(0);
         }
         return vectorDoc;
+    }
+
+    @Override
+    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException {
+        throw new NotImplementedException("This method not supported yet!");
     }
 
     @Override

@@ -107,6 +107,11 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
+    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException {
+        throw new NotImplementedException("This method not supported yet!");
+    }
+
+    @Override
     public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException {
         throw new NotImplementedException("This method supported yet!");
     }

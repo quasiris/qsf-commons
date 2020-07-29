@@ -3,6 +3,9 @@ All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
 ### Added
+
+## [0.3]
+### Added
 - add embedDoc method
 - implement a value 2 filename method for elastic
 

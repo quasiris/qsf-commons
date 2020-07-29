@@ -11,7 +11,14 @@ public class ElasticUtilTest {
     public void value2FieldNameSlashUmlaut() {
 
         String fieldName = ElasticUtil.value2FieldName("Farbe / Ausführung");
-        Assert.assertEquals("farbe___ausf_hrung", fieldName);
+        Assert.assertEquals("farbe___ausfuehrung", fieldName);
+    }
+
+    @Test
+    public void value2FieldNameEUR() {
+
+        String fieldName = ElasticUtil.value2FieldName("Preis in €");
+        Assert.assertEquals("preis_in_eur", fieldName);
     }
 
     @Test

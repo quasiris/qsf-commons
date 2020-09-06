@@ -1,15 +1,15 @@
-package com.quasiris.qsf.commons.text.normalize.filter;
+package com.quasiris.qsf.commons.text.transform.filter;
 
-import com.quasiris.qsf.commons.text.normalize.NormalizerFilter;
+import com.quasiris.qsf.commons.text.transform.TransformerFilter;
 
-public class CharReplaceNormalizeFilter implements NormalizerFilter {
+public class CharReplaceTransformerFilter implements TransformerFilter {
 
 
     private String charsToReplace;
 
     private String[] replacements;
 
-    public CharReplaceNormalizeFilter(String charsToReplace, String[] replacements) {
+    public CharReplaceTransformerFilter(String charsToReplace, String[] replacements) {
         if(charsToReplace.length() != replacements.length) {
             throw new IllegalArgumentException("The lenght must be equal.");
         }
@@ -19,7 +19,7 @@ public class CharReplaceNormalizeFilter implements NormalizerFilter {
 
 
     @Override
-    public String normalize(String text) {
+    public String transform(String text) {
         if(text == null) {
             return null;
         }

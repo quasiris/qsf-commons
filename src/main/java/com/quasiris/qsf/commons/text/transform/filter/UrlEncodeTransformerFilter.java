@@ -1,16 +1,16 @@
-package com.quasiris.qsf.commons.text.normalize.filter;
+package com.quasiris.qsf.commons.text.transform.filter;
 
-import com.quasiris.qsf.commons.text.normalize.NormalizerFilter;
+import com.quasiris.qsf.commons.text.transform.TransformerFilter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class UrlEncodeNormalizeFilter implements NormalizerFilter {
+public class UrlEncodeTransformerFilter implements TransformerFilter {
 
     private String encoding = "UTF-8";
 
     @Override
-    public String normalize(String text) {
+    public String transform(String text) {
         if(text == null) {
             return null;
         }

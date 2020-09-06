@@ -1,23 +1,23 @@
-package com.quasiris.qsf.commons.text.normalize;
+package com.quasiris.qsf.commons.text.transform;
 
 import java.util.List;
 
-public class Normalizer {
+public class TextTransformer {
 
 
-    private List<NormalizerFilter> filters;
+    private List<TransformerFilter> filters;
 
-    public Normalizer(List<NormalizerFilter> filters) {
+    public TextTransformer(List<TransformerFilter> filters) {
         this.filters = filters;
     }
 
-    public Normalizer() {
+    public TextTransformer() {
     }
 
     public String normalize(String text) {
 
-        for(NormalizerFilter filter : filters) {
-            text = filter.normalize(text);
+        for(TransformerFilter filter : filters) {
+            text = filter.transform(text);
         }
         return text;
     }
@@ -27,7 +27,7 @@ public class Normalizer {
      *
      * @return Value for property 'filters'.
      */
-    public List<NormalizerFilter> getFilters() {
+    public List<TransformerFilter> getFilters() {
         return filters;
     }
 
@@ -36,7 +36,7 @@ public class Normalizer {
      *
      * @param filters Value to set for property 'filters'.
      */
-    public void setFilters(List<NormalizerFilter> filters) {
+    public void setFilters(List<TransformerFilter> filters) {
         this.filters = filters;
     }
 }

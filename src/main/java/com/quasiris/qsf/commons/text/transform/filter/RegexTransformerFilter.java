@@ -1,22 +1,22 @@
-package com.quasiris.qsf.commons.text.normalize.filter;
+package com.quasiris.qsf.commons.text.transform.filter;
 
-import com.quasiris.qsf.commons.text.normalize.NormalizerFilter;
+import com.quasiris.qsf.commons.text.transform.TransformerFilter;
 
 import java.util.regex.Pattern;
 
-public class RegexNormalizeFilter implements NormalizerFilter {
+public class RegexTransformerFilter implements TransformerFilter {
 
     private Pattern pattern;
 
     private String replacement = "";
 
 
-    public RegexNormalizeFilter(String pattern) {
+    public RegexTransformerFilter(String pattern) {
         this.pattern = Pattern.compile(pattern);
     }
 
     @Override
-    public String normalize(String text) {
+    public String transform(String text) {
         if(text == null) {
             return null;
         }

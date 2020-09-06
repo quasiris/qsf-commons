@@ -1,24 +1,24 @@
-package com.quasiris.qsf.commons.text.normalize.filter;
+package com.quasiris.qsf.commons.text.transform.filter;
 
-import com.quasiris.qsf.commons.text.normalize.NormalizerFilter;
+import com.quasiris.qsf.commons.text.transform.TransformerFilter;
 import com.quasiris.qsf.commons.text.SpecialChars;
 import org.apache.commons.lang3.StringUtils;
 
-public class TrimAllNormalizeFilter implements NormalizerFilter {
+public class TrimAllTransformerFilter implements TransformerFilter {
 
 
     private String trimChars;
 
-    public TrimAllNormalizeFilter() {
+    public TrimAllTransformerFilter() {
         trimChars = " " + SpecialChars.ALL;
     }
 
-    public TrimAllNormalizeFilter(String trimChars) {
+    public TrimAllTransformerFilter(String trimChars) {
         this.trimChars = trimChars;
     }
 
     @Override
-    public String normalize(String text) {
+    public String transform(String text) {
         if(text == null) {
             return null;
         }

@@ -1,21 +1,21 @@
-package com.quasiris.qsf.commons.text.normalize.filter;
+package com.quasiris.qsf.commons.text.transform.filter;
 
-import com.quasiris.qsf.commons.text.normalize.NormalizerFilter;
+import com.quasiris.qsf.commons.text.transform.TransformerFilter;
 import com.quasiris.qsf.commons.text.SpecialChars;
 
-public class RemoveCharNormalizeFilter implements NormalizerFilter {
+public class RemoveCharTransformerFilter implements TransformerFilter {
 
     private String charsToRemove = SpecialChars.ALL;
 
-    public RemoveCharNormalizeFilter() {
+    public RemoveCharTransformerFilter() {
     }
 
-    public RemoveCharNormalizeFilter(String charsToRemove) {
+    public RemoveCharTransformerFilter(String charsToRemove) {
         this.charsToRemove = charsToRemove;
     }
 
     @Override
-    public String normalize(String text) {
+    public String transform(String text) {
         if(text == null) {
             return null;
         }

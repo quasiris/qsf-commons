@@ -17,7 +17,9 @@ import java.util.List;
 
 /**
  * Normalize text and prepare for embedding
+ * @deprecated  As of release 0.4, replaced by {@link com.quasiris.qsf.commons.text.transform.TextTransformer}
  */
+@Deprecated
 public class TextNormalizerService {
     private Analyzer analyzer;
 

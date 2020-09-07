@@ -17,7 +17,7 @@ public class TextTransformerTest {
 
 
     @Test
-    public void normalizeWithRegisteredFunction() {
+    public void transformWithRegisteredFunction() {
         TextTransformerFactory.register("myFunction", myFunction);
 
         TextTransformer transform = TextTransformerFactory.create("lowerCase|trim|removeSpecialChars|removeNumbers|myFunction");
@@ -27,4 +27,23 @@ public class TextTransformerTest {
 
     Function<String, String> myFunction =
             parameter -> parameter.toLowerCase() + parameter;
+
+
+
+    @Test
+    public void transformWithBuilder() {
+        TextTransformerFactory.register("myFunction", myFunction);
+
+        TextTransformer transform = TextTransformerBuilder.create().
+                lowerCase().
+                trim().
+                removeSpecialChars().
+                removeNumbers().
+                function(myFunction).
+                build();
+
+        String actual = transform.normalize(" fOo.§ba12%r.");
+        Assert.assertEquals("foobarfoobar", actual);
+    }
+
 }

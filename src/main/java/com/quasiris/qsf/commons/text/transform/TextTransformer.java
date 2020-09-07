@@ -39,4 +39,6 @@ public class TextTransformer {
     public void setFilters(List<TransformerFilter> filters) {
         this.filters = filters;
     }
+
+
 }

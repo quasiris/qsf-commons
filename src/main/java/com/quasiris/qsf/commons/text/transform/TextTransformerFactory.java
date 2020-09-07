@@ -5,6 +5,7 @@ import com.quasiris.qsf.commons.text.transform.filter.GermanUmlautTransformerFil
 import com.quasiris.qsf.commons.text.transform.filter.LowerCaseTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveCharTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveNumberTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.StemmingTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.TrimAllTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.TrimTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.UrlDecodeTransformerFilter;
@@ -33,6 +34,8 @@ public class TextTransformerFactory {
         factoryMap.put("urlEncode", new UrlEncodeTransformerFilter());
         factoryMap.put("urlDecode", new UrlDecodeTransformerFilter());
         factoryMap.put("md5", new UrlDecodeTransformerFilter());
+        factoryMap.put("stemming", new StemmingTransformerFilter());
+        factoryMap.put("germanLightStem", new StemmingTransformerFilter());
     }
 
     public static void register(String filterName, TransformerFilter normalizerFilter) {

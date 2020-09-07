@@ -3,6 +3,11 @@ All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
 ### Added
+- add a text transformer implementation
+
+### Deprecated
+- TextNormalizerService - use the TextTransformer instead
+- NormalizerConfig - use the TextTransformer instead
 
 ## [0.3]
 ### Added

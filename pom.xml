@@ -15,10 +15,10 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/quasiris/qsf-commons.git</connection>
-        <developerConnection>scm:git:https://github.com/quasiris/qsf-commons.git</developerConnection>
+        <connection>scm:git:{gitlab.qsc.url}/qsf-commons.git</connection>
+        <developerConnection>scm:git:{gitlab.qsc.url}/qsf-commons.git</developerConnection>
         <url>https://github.com/quasiris/qsf-commons</url>
-    <tag>HEAD</tag>
+        <tag>HEAD</tag>
   </scm>
 
     <dependencies>
@@ -202,11 +202,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>quasiris-snapshots</id>
+            <name>Quasiris Snapshot Repository</name>
+            <url>${nexus.base.url}/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
+            <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>

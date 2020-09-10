@@ -15,8 +15,8 @@
     </properties>
 
     <scm>
-        <connection>scm:git:{gitlab.qsc.url}/qsf-commons.git</connection>
-        <developerConnection>scm:git:{gitlab.qsc.url}/qsf-commons.git</developerConnection>
+        <connection>scm:git:${gitlab.qsc.url}/qsf-commons.git</connection>
+        <developerConnection>scm:git:${gitlab.qsc.url}/qsf-commons.git</developerConnection>
         <url>https://github.com/quasiris/qsf-commons</url>
         <tag>HEAD</tag>
   </scm>

@@ -2,6 +2,7 @@
 All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
+## [0.4] - 2020-09-10
 ### Added
 - add a text transformer implementation
 

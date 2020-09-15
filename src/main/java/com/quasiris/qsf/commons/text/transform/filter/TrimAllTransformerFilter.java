@@ -1,7 +1,7 @@
 package com.quasiris.qsf.commons.text.transform.filter;
 
+import com.quasiris.qsf.commons.text.TextUtils;
 import com.quasiris.qsf.commons.text.transform.TransformerFilter;
-import com.quasiris.qsf.commons.text.SpecialChars;
 import org.apache.commons.lang3.StringUtils;
 
 public class TrimAllTransformerFilter implements TransformerFilter {
@@ -10,7 +10,6 @@ public class TrimAllTransformerFilter implements TransformerFilter {
     private String trimChars;
 
     public TrimAllTransformerFilter() {
-        trimChars = " " + SpecialChars.ALL;
     }
 
     public TrimAllTransformerFilter(String trimChars) {
@@ -23,6 +22,9 @@ public class TrimAllTransformerFilter implements TransformerFilter {
             return null;
         }
 
+        if(trimChars == null) {
+            return TextUtils.strip(text);
+        }
         return StringUtils.strip(text, trimChars);
     }
 

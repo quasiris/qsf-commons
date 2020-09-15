@@ -57,4 +57,44 @@ public class TextUtils {
         return false;
 
     }
+
+    public static String trimAll(String str) {
+        return strip(str);
+    }
+
+    public static String strip(String str) {
+        if (isEmpty(str)) {
+            return str;
+        } else {
+            str = stripStart(str);
+            return stripEnd(str);
+        }
+    }
+
+    public static String stripStart(String str) {
+        if(str == null) {
+            return null;
+        }
+        int start = 0;
+        int strLen = str.length();
+        while(start != strLen && !Character.isLetterOrDigit(str.charAt(start))) {
+            ++start;
+        }
+        return str.substring(start);
+    }
+
+    public static String stripEnd(String str) {
+        if(str == null) {
+            return null;
+        }
+        int end = str.length();
+        while(end != 0 && !Character.isLetterOrDigit(str.charAt(end - 1))) {
+            --end;
+        }
+        return str.substring(0, end);
+    }
+
+    public static boolean isEmpty(CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
 }

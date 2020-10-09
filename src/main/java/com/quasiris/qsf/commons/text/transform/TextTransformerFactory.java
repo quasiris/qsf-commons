@@ -38,6 +38,9 @@ public class TextTransformerFactory {
         factoryMap.put("germanLightStem", new StemmingTransformerFilter());
     }
 
+    public static List<String> getRegisteredFilters() {
+        return new ArrayList<>(factoryMap.keySet());
+    }
     public static void register(String filterName, TransformerFilter normalizerFilter) {
         factoryMap.put(filterName, normalizerFilter);
     }

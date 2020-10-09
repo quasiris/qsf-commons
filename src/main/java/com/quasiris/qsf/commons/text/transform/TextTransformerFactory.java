@@ -8,6 +8,7 @@ import com.quasiris.qsf.commons.text.transform.filter.RemoveNumberTransformerFil
 import com.quasiris.qsf.commons.text.transform.filter.StemmingTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.TrimAllTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.TrimTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.UpperCaseTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.UrlDecodeTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.UrlEncodeTransformerFilter;
 
@@ -24,7 +25,7 @@ public class TextTransformerFactory {
     private static final Map<String, TransformerFilter> factoryMap = new HashMap<>();
     static {
         factoryMap.put("lowerCase", new LowerCaseTransformerFilter());
-        factoryMap.put("upperCase", new LowerCaseTransformerFilter());
+        factoryMap.put("upperCase", new UpperCaseTransformerFilter());
         factoryMap.put("replaceGermanUmlauts", new GermanUmlautTransformerFilter());
         factoryMap.put("removeSpecialChars", new RemoveCharTransformerFilter());
         factoryMap.put("removeNumbers", new RemoveNumberTransformerFilter());

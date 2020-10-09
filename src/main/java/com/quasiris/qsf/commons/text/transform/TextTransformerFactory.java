@@ -55,10 +55,16 @@ public class TextTransformerFactory {
 
 
     public static TransformerFilter createFilter(String filterName) {
-        if(filterName.startsWith("lucene.")) {
-            String luceneFilter = filterName.replaceAll(Pattern.quote("lucene."), "");
+        if(filterName.startsWith("luceneTokenFilter.")) {
+            String luceneFilter = filterName.replaceAll(Pattern.quote("luceneTokenFilter."), "");
             LuceneTransformerFilter luceneTransformerFilter =
                     new LuceneTransformerFilter(Collections.emptyList(), Collections.singletonList(luceneFilter));
+            return luceneTransformerFilter;
+        }
+        if(filterName.startsWith("luceneCharFilter.")) {
+            String luceneFilter = filterName.replaceAll(Pattern.quote("luceneCharFilter."), "");
+            LuceneTransformerFilter luceneTransformerFilter =
+                    new LuceneTransformerFilter(Collections.singletonList(luceneFilter), Collections.emptyList());
             return luceneTransformerFilter;
         }
 

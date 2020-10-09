@@ -3,6 +3,7 @@ package com.quasiris.qsf.commons.text.transform;
 import com.quasiris.qsf.commons.text.transform.filter.FunctionTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.GermanUmlautTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.LowerCaseTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.LuceneTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveCharTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveNumberTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.StemmingTransformerFilter;
@@ -14,6 +15,7 @@ import com.quasiris.qsf.commons.text.transform.filter.UrlEncodeTransformerFilter
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,13 @@ public class TextTransformerFactory {
 
 
     public static TransformerFilter createFilter(String filterName) {
+        if(filterName.startsWith("lucene.")) {
+            String luceneFilter = filterName.replaceAll(Pattern.quote("lucene."), "");
+            LuceneTransformerFilter luceneTransformerFilter =
+                    new LuceneTransformerFilter(Collections.emptyList(), Collections.singletonList(luceneFilter));
+            return luceneTransformerFilter;
+        }
+
         TransformerFilter normalizerFilter = factoryMap.get(filterName);
         if(normalizerFilter != null) {
             return normalizerFilter;

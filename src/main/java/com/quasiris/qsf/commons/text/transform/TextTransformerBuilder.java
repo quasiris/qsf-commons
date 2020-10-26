@@ -103,6 +103,10 @@ public final class TextTransformerBuilder {
         return this;
     }
 
+    public TextTransformerBuilder addFilter(TransformerFilter transformerFilter) {
+        filters.add(transformerFilter);
+        return this;
+    }
 
     public TextTransformer build() {
         TextTransformer textTransformer = new TextTransformer();

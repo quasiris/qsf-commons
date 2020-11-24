@@ -2,9 +2,11 @@ package com.quasiris.qsf.commons.text.transform;
 
 import com.quasiris.qsf.commons.text.transform.filter.FunctionTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.GermanUmlautTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.JsonQuoteAsStringTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.LowerCaseTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.LuceneTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveCharTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.RemoveMultipleWhitespacesTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.RemoveNumberTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.StemmingTransformerFilter;
 import com.quasiris.qsf.commons.text.transform.filter.TrimAllTransformerFilter;
@@ -31,6 +33,7 @@ public class TextTransformerFactory {
         factoryMap.put("replaceGermanUmlauts", new GermanUmlautTransformerFilter());
         factoryMap.put("removeSpecialChars", new RemoveCharTransformerFilter());
         factoryMap.put("removeNumbers", new RemoveNumberTransformerFilter());
+        factoryMap.put("removeMultipleWhitspaces", new RemoveMultipleWhitespacesTransformerFilter());
         factoryMap.put("trim", new TrimTransformerFilter());
         factoryMap.put("trimAll", new TrimAllTransformerFilter());
         factoryMap.put("removeWhitespace", new RemoveCharTransformerFilter(" "));
@@ -39,6 +42,8 @@ public class TextTransformerFactory {
         factoryMap.put("md5", new UrlDecodeTransformerFilter());
         factoryMap.put("stemming", new StemmingTransformerFilter());
         factoryMap.put("germanLightStem", new StemmingTransformerFilter());
+        factoryMap.put("jsonQuoteAsString", new JsonQuoteAsStringTransformerFilter());
+        factoryMap.put("removeHtml", new LuceneTransformerFilter(Arrays.asList("htmlStrip"), Collections.emptyList()));
     }
 
     public static List<String> getRegisteredFilters() {

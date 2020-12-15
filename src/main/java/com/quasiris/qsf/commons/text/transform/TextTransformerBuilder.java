@@ -55,6 +55,11 @@ public final class TextTransformerBuilder {
         return this;
     }
 
+    public TextTransformerBuilder removeMultipleWhitspaces() {
+        addFilter("removeMultipleWhitspaces");
+        return this;
+    }
+
     public TextTransformerBuilder removeWhitespace() {
         addFilter("removeWhitespace");
         return this;

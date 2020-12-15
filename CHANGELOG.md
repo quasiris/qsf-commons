@@ -2,6 +2,15 @@
 All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
+## [0.6] - 2020-12-15
+### Added
+- implement a method to get the available text transformer filters
+- make it possible to use lucene filters
+
+### Fixed
+- fix uppercase filter registration
+- quote json as string and remove multiple whitespaces in filter
+
 ## [0.5] - 2020-09-17
 ### Added
 - implement text util to strip all chars that are no characters or digits

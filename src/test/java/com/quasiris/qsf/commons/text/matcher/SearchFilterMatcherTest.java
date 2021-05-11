@@ -1,8 +1,7 @@
 package com.quasiris.qsf.commons.text.matcher;
 
-import com.quasiris.qsf.query.FilterOperator;
-import com.quasiris.qsf.query.SearchFilter;
-import com.quasiris.qsf.query.SearchFilterBuilder;
+import com.quasiris.qsf.dto.FilterOperator;
+import com.quasiris.qsf.dto.SearchFilterDTO;
 import com.quasiris.qsf.response.Document;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,17 +31,17 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchDocument() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("manufacturer");
         filter.setFilterOperator(FilterOperator.OR);
         filter.setValues(Arrays.asList("Samsung", "IPhone"));
         filters.add(filter);
-        SearchFilter filter2 = SearchFilterBuilder.create().withId("stockCount").
-                withLowerBoundExclude().
-                withUpperBoundExclude().
-                rangeFilter(100.0, 200.0).
-                build();
+        SearchFilterDTO filter2 = new SearchFilterDTO();
+        filter2.setLowerExcluded(true);
+        filter2.setUpperExcluded(true);
+        filter2.setMinValue(100.00);
+        filter2.setMaxValue(200.00);
         filter2.setName("stockCount");
         filters.add(filter2);
 
@@ -56,18 +55,19 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchDocumentNOT() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("manufacturer");
         filter.setFilterOperator(FilterOperator.OR);
         filter.setValues(Arrays.asList("Samsung", "IPhone"));
         filters.add(filter);
-        SearchFilter filter2 = SearchFilterBuilder.create().withId("stockCount").
-                withLowerBoundExclude().
-                withUpperBoundExclude().
-                rangeFilter(100.0, 200.0).
-                build();
+        SearchFilterDTO filter2 = new SearchFilterDTO();
+        filter2.setLowerExcluded(true);
+        filter2.setUpperExcluded(true);
+        filter2.setMinValue(100.00);
+        filter2.setMaxValue(200.00);
         filter2.setName("stockCount");
+        filters.add(filter2);
         filter2.setFilterOperator(FilterOperator.NOT);
         filters.add(filter2);
 
@@ -81,8 +81,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchOneValue() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("manufacturer");
         filter.setFilterOperator(FilterOperator.OR);
         filter.setValues(Arrays.asList("Samsung", "IPhone"));
@@ -98,12 +98,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchNumber() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = SearchFilterBuilder.create().withId("stockCount").
-                withLowerBoundExclude().
-                withUpperBoundExclude().
-                rangeFilter(100.0, 200.0).
-                build();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
+        filter.setLowerExcluded(true);
+        filter.setUpperExcluded(true);
+        filter.setMinValue(100.00);
+        filter.setMaxValue(200.00);
         filter.setName("stockCount");
         filters.add(filter);
 
@@ -117,12 +117,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchNumberNOT() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = SearchFilterBuilder.create().withId("stockCount").
-                withLowerBoundExclude().
-                withUpperBoundExclude().
-                rangeFilter(100.0, 200.0).
-                build();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
+        filter.setLowerExcluded(true);
+        filter.setUpperExcluded(true);
+        filter.setMinValue(100.00);
+        filter.setMaxValue(200.00);
         filter.setName("stockCount");
         filter.setFilterOperator(FilterOperator.NOT);
         filters.add(filter);
@@ -137,8 +137,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchBoolean() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("onStock");
         filter.setFilterOperator(FilterOperator.OR);
         filter.setValues(Arrays.asList("true"));
@@ -154,8 +154,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchBooleanNOT() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("onStock");
         filter.setFilterOperator(FilterOperator.NOT);
         filter.setValues(Arrays.asList("true"));
@@ -171,8 +171,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchValues() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("tags");
         filter.setFilterOperator(FilterOperator.AND);
         filter.setValues(Arrays.asList("5g", "quad-core"));
@@ -188,8 +188,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchValuesNone() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("tags");
         filter.setFilterOperator(FilterOperator.AND);
         filter.setValues(Arrays.asList("5g", "quad-core", "other"));
@@ -205,8 +205,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchValuesNOT() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filter.setName("tags");
         filter.setFilterOperator(FilterOperator.NOT);
         filter.setValues(Arrays.asList("other"));
@@ -222,8 +222,8 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchOneEmptyValue() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
-        SearchFilter filter = new SearchFilter();
+        List<SearchFilterDTO> filters = new ArrayList<>();
+        SearchFilterDTO filter = new SearchFilterDTO();
         filters.add(filter);
 
         // when
@@ -236,7 +236,7 @@ public class SearchFilterMatcherTest {
     @Test
     public void matchEmptyFilters() {
         // given
-        List<SearchFilter> filters = new ArrayList<>();
+        List<SearchFilterDTO> filters = new ArrayList<>();
 
         // when
         boolean match = new SearchFilterMatcher().matches(filters, doc.getDocument());
@@ -249,7 +249,7 @@ public class SearchFilterMatcherTest {
     public void matchEmptyDoc() {
         // given
         Map<String, Object> values = new HashMap<>();
-        List<SearchFilter> filters = new ArrayList<>();
+        List<SearchFilterDTO> filters = new ArrayList<>();
 
         // when
         boolean match = new SearchFilterMatcher().matches(filters, doc.getDocument());
@@ -262,7 +262,7 @@ public class SearchFilterMatcherTest {
     public void matchNull() {
         // given
         Map<String, Object> values = null;
-        List<SearchFilter> filters = null;
+        List<SearchFilterDTO> filters = null;
 
         // when
         boolean match = new SearchFilterMatcher().matches(filters, doc.getDocument());
@@ -274,8 +274,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringListValueAND() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.AND).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.AND);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, Arrays.asList("grün", "gelb")));
         assertFalse(matcher.matches(searchFilter, "grün"));
@@ -285,8 +287,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringListValueOR() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.OR).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.OR);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, Arrays.asList("grün", "gelb")));
         assertTrue(matcher.matches(searchFilter, "grün"));
@@ -296,8 +300,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringListValueNOT() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.NOT).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.NOT);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertFalse(matcher.matches(searchFilter, Arrays.asList("grün", "gelb")));
         assertFalse(matcher.matches(searchFilter, Arrays.asList("grün", "blau")));
@@ -308,8 +314,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueAND() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.AND).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.AND);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertFalse(matcher.matches(searchFilter, "grün"));
         assertFalse(matcher.matches(searchFilter, "blau"));
@@ -318,8 +326,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueOR() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.OR).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.OR);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, "grün"));
         assertFalse(matcher.matches(searchFilter, "blau"));
@@ -328,8 +338,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueNOT() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.NOT).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.NOT);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertFalse(matcher.matches(searchFilter, "grün"));
         assertTrue(matcher.matches(searchFilter, "blau"));
@@ -338,8 +350,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueUppercase() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.OR).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.OR);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, "grün"));
         assertTrue(matcher.matches(searchFilter, "Grün"));
@@ -351,8 +365,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueContainsAND() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.AND).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.AND);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, Arrays.asList("grün", "gelb")));
         assertFalse(matcher.matches(searchFilter, "grün (metallic)"));
@@ -362,8 +378,10 @@ public class SearchFilterMatcherTest {
     @Test
     public void testSimpleStringValueContainsOR() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("farbe")
-                .withFilterOperator(FilterOperator.OR).value("grün").value("gelb").build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setName("farbe");
+        searchFilter.setFilterOperator(FilterOperator.OR);
+        searchFilter.setValues(Arrays.asList("grün", "gelb"));
 
         assertTrue(matcher.matches(searchFilter, "grün (metallic)"));
         assertFalse(matcher.matches(searchFilter, "blau"));
@@ -372,7 +390,11 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueLowerIncludedWithLists() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").rangeFilter(128.0, null).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(null);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,127.0)));
         assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,128.0)));
@@ -382,8 +404,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueLowerIncludedWithListsNOT() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher")
-                .withFilterOperator(FilterOperator.NOT).rangeFilter(128.0, null).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(null);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setName("speicher");
+        searchFilter.setFilterOperator(FilterOperator.NOT);
 
         assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,127.0)));
         assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,128.0)));
@@ -393,7 +419,11 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueLowerIncluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").rangeFilter(128.0, null).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(null);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertTrue(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -403,8 +433,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueLowerIncludedNOT() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher")
-                .withFilterOperator(FilterOperator.NOT).rangeFilter(128.0, null).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(null);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setName("speicher");
+        searchFilter.setFilterOperator(FilterOperator.NOT);
 
         assertTrue(matcher.matchesRangeValue(searchFilter, 127.0));
         assertFalse(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -414,7 +448,11 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueLowerExcluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").withLowerBoundExclude().rangeFilter(128.0, null).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(null);
+        searchFilter.setLowerExcluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertFalse(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -424,7 +462,11 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperIncluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").rangeFilter(null, 128.0).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(null);
+        searchFilter.setMaxValue(128.0);
+        searchFilter.setName("speicher");
+        searchFilter.setUpperIncluded(true);
 
         assertTrue(matcher.matchesRangeValue(searchFilter, 127.0));
         assertTrue(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -434,7 +476,11 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperExcluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").withUpperBoundExclude().rangeFilter(null, 128.0).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(null);
+        searchFilter.setMaxValue(128.0);
+        searchFilter.setUpperExcluded(true);
+        searchFilter.setName("speicher");
 
         assertTrue(matcher.matchesRangeValue(searchFilter, 127.0));
         assertFalse(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -444,11 +490,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperLowerExcluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").
-                withLowerBoundExclude().
-                withUpperBoundExclude().
-                rangeFilter(128.0, 256.0).
-                build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(256.0);
+        searchFilter.setLowerExcluded(true);
+        searchFilter.setUpperExcluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertFalse(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -461,11 +508,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperLowerIncluded() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").
-                withLowerBoundInclude().
-                withUpperBoundInclude().
-                rangeFilter(128.0, 256.0).
-                build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(256.0);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setUpperIncluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertTrue(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -478,11 +526,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperIncludeLowerExclude() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").
-                withLowerBoundInclude().
-                withUpperBoundExclude().
-                rangeFilter(128.0, 256.0).
-                build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(256.0);
+        searchFilter.setLowerIncluded(true);
+        searchFilter.setUpperExcluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertTrue(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -496,11 +545,12 @@ public class SearchFilterMatcherTest {
     @Test
     public void testRangeValueUpperExcludeLowerInclude() {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").
-                withLowerBoundExclude().
-                withUpperBoundInclude().
-                rangeFilter(128.0, 256.0).
-                build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(128.0);
+        searchFilter.setMaxValue(256.0);
+        searchFilter.setLowerExcluded(true);
+        searchFilter.setUpperIncluded(true);
+        searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
         assertFalse(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -515,7 +565,11 @@ public class SearchFilterMatcherTest {
         SearchFilterMatcher matcher = new SearchFilterMatcher();
         Double min = null;
         Double max = null;
-        SearchFilter searchFilter = SearchFilterBuilder.create().withId("speicher").withUpperBoundExclude().rangeFilter(min, max).build();
+        SearchFilterDTO searchFilter = new SearchFilterDTO();
+        searchFilter.setMinValue(min);
+        searchFilter.setMaxValue(max);
+        searchFilter.setUpperExcluded(true);
+        searchFilter.setName("speicher");
         assertTrue(matcher.matchesRangeValue(searchFilter, 127.0));
     }
 }

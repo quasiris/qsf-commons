@@ -1,8 +1,7 @@
 package com.quasiris.qsf.commons.text.matcher;
 
-import com.quasiris.qsf.query.FilterOperator;
-import com.quasiris.qsf.query.RangeFilterValue;
-import com.quasiris.qsf.query.SearchFilter;
+import com.quasiris.qsf.dto.FilterOperator;
+import com.quasiris.qsf.dto.SearchFilterDTO;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,12 +19,12 @@ public class SearchFilterMatcher {
         this.matcher = new ContainsLowerCaseMatcher();
     }
 
-    public boolean matches(List<SearchFilter> filters, Map<String, Object> values) {
+    public boolean matches(List<SearchFilterDTO> filters, Map<String, Object> values) {
         boolean result = false;
         int matchedFilters = 0;
         if(values != null && values.size() > 0 &&
                 filters != null && filters.size() > 0) {
-            for (SearchFilter filter : filters) { // concatenate filters with AND
+            for (SearchFilterDTO filter : filters) { // concatenate filters with AND
                 String key = filter.getName();
                 if (values.containsKey(key)) {
                     Object rawValue = values.get(key);
@@ -44,7 +43,7 @@ public class SearchFilterMatcher {
         return result;
     }
 
-    public boolean matches(SearchFilter filter, Object value) {
+    public boolean matches(SearchFilterDTO filter, Object value) {
         boolean result = false;
         if(value != null) {
             if (value instanceof List) {
@@ -71,14 +70,14 @@ public class SearchFilterMatcher {
         return result;
     }
 
-    public boolean matches(SearchFilter searchFilter, List<String> values) {
+    public boolean matches(SearchFilterDTO searchFilter, List<String> values) {
         boolean result = false;
         if(searchFilter != null && values != null && values.size() > 0) {
             result = searchFilter.getFilterOperator() == FilterOperator.AND;
-            for (String filterValue : searchFilter.getValues()) { // concatenate with FilterOperator
+            for (Object filterValue : searchFilter.getValues()) { // concatenate with FilterOperator
                 boolean valueResults = false;
                 for (String value : values) { // concatenate values with OR
-                    boolean matches = matcher.matches(value, filterValue);
+                    boolean matches = matcher.matches(value, filterValue.toString());
                     valueResults |= matches;
                     if (matches) {
                         break;
@@ -105,7 +104,7 @@ public class SearchFilterMatcher {
         return result;
     }
 
-    public boolean matches(SearchFilter searchFilter, String value) {
+    public boolean matches(SearchFilterDTO searchFilter, String value) {
         boolean result = false;
         if(value != null) {
             result = matches(searchFilter, Arrays.asList(value));
@@ -113,12 +112,24 @@ public class SearchFilterMatcher {
         return result;
     }
 
-    public boolean matchesRangeValue(SearchFilter searchFilter, List<Double> values) {
+    public boolean matchesRangeValue(SearchFilterDTO searchFilter, List<Double> values) {
         boolean result = false;
         for(Double value : values) {
-            RangeFilterValue<Double> rangeValue = searchFilter.getRangeValue(Double.class);
-            Double minValue = rangeValue.getMinValue();
-            Double maxValue = rangeValue.getMaxValue();
+            Double minValue = null;
+            if(searchFilter.getMinValue() != null) {
+                try {
+                    minValue = Double.parseDouble(searchFilter.getMinValue().toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+            Double maxValue = null;
+            if(searchFilter.getMaxValue() != null) {
+                try {
+                    maxValue = Double.parseDouble(searchFilter.getMaxValue().toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
 
             boolean matches = false;
             if(value == null) {
@@ -170,7 +181,7 @@ public class SearchFilterMatcher {
         return result;
     }
 
-    public boolean matchesRangeValue(SearchFilter searchFilter, Double value) {
+    public boolean matchesRangeValue(SearchFilterDTO searchFilter, Double value) {
         boolean result = false;
         if(value != null) {
             result = matches(searchFilter, Arrays.asList(value));

@@ -393,7 +393,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(null);
-        searchFilter.setLowerIncluded(true);
         searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,127.0)));
@@ -407,7 +406,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(null);
-        searchFilter.setLowerIncluded(true);
         searchFilter.setName("speicher");
         searchFilter.setFilterOperator(FilterOperator.NOT);
 
@@ -422,7 +420,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(null);
-        searchFilter.setLowerIncluded(true);
         searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
@@ -436,7 +433,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(null);
-        searchFilter.setLowerIncluded(true);
         searchFilter.setName("speicher");
         searchFilter.setFilterOperator(FilterOperator.NOT);
 
@@ -466,7 +462,6 @@ public class SearchFilterMatcherTest {
         searchFilter.setMinValue(null);
         searchFilter.setMaxValue(128.0);
         searchFilter.setName("speicher");
-        searchFilter.setUpperIncluded(true);
 
         assertTrue(matcher.matchesRangeValue(searchFilter, 127.0));
         assertTrue(matcher.matchesRangeValue(searchFilter, 128.0));
@@ -511,8 +506,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(256.0);
-        searchFilter.setLowerIncluded(true);
-        searchFilter.setUpperIncluded(true);
         searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));
@@ -529,7 +522,6 @@ public class SearchFilterMatcherTest {
         SearchFilterDTO searchFilter = new SearchFilterDTO();
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(256.0);
-        searchFilter.setLowerIncluded(true);
         searchFilter.setUpperExcluded(true);
         searchFilter.setName("speicher");
 
@@ -549,7 +541,6 @@ public class SearchFilterMatcherTest {
         searchFilter.setMinValue(128.0);
         searchFilter.setMaxValue(256.0);
         searchFilter.setLowerExcluded(true);
-        searchFilter.setUpperIncluded(true);
         searchFilter.setName("speicher");
 
         assertFalse(matcher.matchesRangeValue(searchFilter, 127.0));

@@ -132,39 +132,43 @@ public class SearchFilterMatcher {
             }
 
             boolean matches = false;
+            boolean lowerIncluded = searchFilter.getLowerIncluded() == null || searchFilter.getLowerIncluded();
+            boolean upperIncluded = searchFilter.getUpperIncluded() == null || searchFilter.getUpperIncluded();
+            boolean lowerExcluded = searchFilter.getLowerExcluded() != null && searchFilter.getLowerExcluded();
+            boolean upperExcluded = searchFilter.getUpperExcluded() != null && searchFilter.getUpperExcluded();
             if(value == null) {
                 matches = false;
             } else if(minValue == null && maxValue == null) {
                 matches = true;
-            } else if(searchFilter.isUpperExcluded() && minValue == null) {
+            } else if(upperExcluded && minValue == null) {
                 if(value < maxValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isUpperIncluded() && minValue == null) {
+            } else if(upperIncluded && minValue == null) {
                 if(value <= maxValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerExcluded() && maxValue == null) {
+            } else if(lowerExcluded && maxValue == null) {
                 if(value > minValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerIncluded() && maxValue == null ) {
+            } else if(lowerIncluded && maxValue == null ) {
                 if(value >= minValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerExcluded() && searchFilter.isUpperExcluded()) {
+            } else if(lowerExcluded && upperExcluded) {
                 if(value > minValue && value < maxValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerIncluded() && searchFilter.isUpperIncluded()) {
+            } else if(lowerIncluded && upperIncluded) {
                 if(value >= minValue && value <= maxValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerIncluded() && searchFilter.isUpperExcluded()) {
+            } else if(lowerIncluded && upperExcluded) {
                 if(value >= minValue && value < maxValue) {
                     matches = true;
                 }
-            } else if(searchFilter.isLowerExcluded() && searchFilter.isUpperIncluded()) {
+            } else if(lowerExcluded && upperIncluded) {
                 if(value > minValue && value <= maxValue) {
                     matches = true;
                 }

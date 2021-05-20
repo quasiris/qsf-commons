@@ -2,6 +2,11 @@
 All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
+## [0.7] - 2021-05-20
+### Added
+- add SearchFilterMatcher
+- use qsf-dto dependency
+
 ## [0.6] - 2020-12-15
 ### Added
 - implement a method to get the available text transformer filters

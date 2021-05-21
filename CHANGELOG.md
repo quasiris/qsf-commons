@@ -7,6 +7,9 @@ All notable changes in this project will be documented in this file.
 - add SearchFilterMatcher
 - use qsf-dto dependency
 
+### Security
+- fix CVE-2020-13956 in apache http client
+
 ## [0.6] - 2020-12-15
 ### Added
 - implement a method to get the available text transformer filters

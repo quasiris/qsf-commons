@@ -1,7 +1,7 @@
 package com.quasiris.qsf.commons.text.matcher;
 
-import com.quasiris.qsf.dto.FilterOperator;
-import com.quasiris.qsf.dto.SearchFilterDTO;
+import com.quasiris.qsf.dto.query.FilterOperator;
+import com.quasiris.qsf.dto.query.SearchFilterDTO;
 
 import java.util.Arrays;
 import java.util.List;

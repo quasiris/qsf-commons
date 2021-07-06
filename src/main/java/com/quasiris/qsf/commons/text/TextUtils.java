@@ -1,5 +1,7 @@
 package com.quasiris.qsf.commons.text;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.regex.Pattern;
 
 /**
@@ -96,5 +98,44 @@ public class TextUtils {
 
     public static boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
+    }
+
+    public static String limit(String text, int maxLength) {
+        return limit(text, maxLength, "..");
+    }
+
+    /**
+     * Limit text after word
+     * @param text
+     * @param maxLength
+     * @param punctuation
+     * @return
+     */
+    public static String limit(String text, int maxLength, String punctuation) {
+        if(StringUtils.isNotEmpty(text)) {
+            if(StringUtils.isNotEmpty(punctuation)) {
+                maxLength -= punctuation.length();
+            }
+
+            text = StringUtils.substring(text, 0, maxLength);
+            text = removeLastToken(text);
+
+            if(StringUtils.isNotEmpty(punctuation)) {
+                text += punctuation;
+            }
+        }
+
+        return text;
+    }
+
+    protected static String removeLastToken(String text) {
+        if(StringUtils.isNotEmpty(text)) {
+            while (text.length() > 0 && !text.endsWith(" ")) {
+                text = text.substring(0, text.length()-1);
+            }
+            text = text.trim();
+        }
+
+        return text;
     }
 }

@@ -60,7 +60,7 @@ public class ModelRepositoryManager {
         if(StringUtils.isNotBlank(modelname)) {
             String[] parts = modelname.split("\\|");
             if(parts.length == 3) {
-                parts[0] = parts[0].replaceAll("\\.", File.separator);
+                parts[0] = parts[0].replaceAll("\\.", File.separator); // TODO this is not working under windows
                 String artifact = parts[1]+"-"+parts[2];
                 path = String.join(File.separator, parts);
                 path = String.join(File.separator, path, artifact);

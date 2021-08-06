@@ -1,7 +1,9 @@
 package com.quasiris.qsf.commons.text;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -137,5 +139,10 @@ public class TextUtils {
         }
 
         return text;
+    }
+
+    public static String replace(String value, Map<String, Object> valueMap) {
+        StringSubstitutor stringSubstitutor = new StringSubstitutor(valueMap);
+        return stringSubstitutor.replace(value);
     }
 }

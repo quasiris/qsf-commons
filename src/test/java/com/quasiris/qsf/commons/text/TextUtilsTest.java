@@ -3,6 +3,9 @@ package com.quasiris.qsf.commons.text;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TextUtilsTest {
 
     @Test
@@ -89,4 +92,21 @@ public class TextUtilsTest {
         Assert.assertEquals(" -foo", actual);
     }
 
+    @Test
+    public void testReplaceString() {
+        String url = "https://${hostname}/";
+        Map<String, Object> paremters = new HashMap<>();
+        paremters.put("hostname", "www.quasiris.de");
+        String actual = TextUtils.replace(url, paremters);
+        Assert.assertEquals("https://www.quasiris.de/", actual);
+    }
+
+    @Test
+    public void testReplaceLong() {
+        String number = "${number}";
+        Map<String, Object> paremters = new HashMap<>();
+        paremters.put("number", 42L);
+        String actual = TextUtils.replace(number, paremters);
+        Assert.assertEquals("42", actual);
+    }
 }

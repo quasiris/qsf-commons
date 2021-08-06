@@ -108,10 +108,10 @@ public class TextUtils {
 
     /**
      * Limit text after word
-     * @param text
-     * @param maxLength
-     * @param punctuation
-     * @return
+     * @param text with should be limited
+     * @param maxLength of text
+     * @param punctuation after limit
+     * @return transformed text
      */
     public static String limit(String text, int maxLength, String punctuation) {
         if(StringUtils.isNotEmpty(text)) {

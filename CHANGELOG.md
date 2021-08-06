@@ -2,9 +2,13 @@
 All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
+### Added
+- add YamlFactory
+
 ## [1.0.0]
 ### Changed
 - update to qsf-dto 1.0.0
+- copy/ refactor classes from qsc-admin, qsf-integration
 
 ## [0.7] - 2021-05-20
 ### Added

@@ -7,5 +7,5 @@ jdk:
 sudo: false
 script: mvn clean package -Dgpg.skip=true
 after_success:
-  - mvn clean test cobertura:cobertura coveralls:report
+  - if [ "$JAVA_HOME" = "/usr/lib/jvm/java-1.8.0-openjdk-amd64" ]; then mvn test cobertura:cobertura coveralls:report; fi
   - bash <(curl -s https://codecov.io/bash)

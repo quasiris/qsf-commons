@@ -1,6 +1,8 @@
 package com.quasiris.qsf.commons.text.date;
 
 import java.time.Instant;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,12 +27,15 @@ public class HumanDateParser {
         durationMap.put("heute", new DayDateParser("P0D"));
         durationMap.put("last 3 days", new DurationDateParser("P3D"));
         durationMap.put("letzten 3 tage", new DurationDateParser("P3D"));
+        durationMap.put("letzten 7 tage", new DurationDateParser("P7D"));
+        durationMap.put("letzten 30 tage", new DurationDateParser("P30D"));
         durationMap.put("this week", new WeekDateParser("P0D"));
         durationMap.put("diese woche", new WeekDateParser("P0D"));
         durationMap.put("last week", new WeekDateParser("P7D"));
         durationMap.put("letzte woche", new WeekDateParser("P7D"));
         durationMap.put("last 3 month", new DurationDateParser("P30D"));
-        durationMap.put("letzten 3 monate", new DurationDateParser("P90D"));
+        durationMap.put("letzten 3 monate", new PeriodDateParser("P3M"));
+        durationMap.put("letzten 6 monate", new PeriodDateParser("P6M"));
         durationMap.put("this month", new MonthDateParser("P0D"));
         durationMap.put("dieser monat", new MonthDateParser("P0D"));
         durationMap.put("last month", new MonthDateParser("P30D"));
@@ -44,13 +49,17 @@ public class HumanDateParser {
     public DateParser getDateParser() {
         if(dateParser == null) {
             dateParser = durationMap.get(humanDate.toLowerCase());
-            if(dateParser == null) {
+            if(dateParser == null && humanDate.matches("^\\d{4}$")) {
+                dateParser = new YearParser(humanDate);
+            } else if (dateParser == null) {
                 dateParser = new DurationDateParser("P1D");
             }
             dateParser.setReference(now);
         }
         return dateParser;
     }
+
+
 
     public Instant getStart() {
         return getDateParser().getStart();

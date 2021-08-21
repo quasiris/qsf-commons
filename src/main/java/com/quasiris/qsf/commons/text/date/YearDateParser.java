@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 public class YearDateParser implements DateParser {
 
@@ -28,20 +29,20 @@ public class YearDateParser implements DateParser {
 
     @Override
     public Instant getStart() {
+        return getFirstOfYear().toInstant();
+    }
+
+    ZonedDateTime getFirstOfYear() {
         Instant start = reference.minusSeconds(duration.getSeconds());
         ZonedDateTime zdt = ZonedDateTime.ofInstant ( start , zoneId );
-        ZonedDateTime firstOfWeek = zdt.with ( ChronoField.DAY_OF_YEAR , 1 ).with(ChronoField.DAY_OF_MONTH, 1); // ISO 8601, Monday is first day of week.
-        firstOfWeek = firstOfWeek.toLocalDate().atStartOfDay ( zoneId );
-        return firstOfWeek.toInstant();
+        ZonedDateTime firstOfYear = zdt.with ( ChronoField.DAY_OF_YEAR , 1 );
+        firstOfYear = firstOfYear.toLocalDate().atStartOfDay ( zoneId );
+        return firstOfYear;
     }
+
 
     @Override
     public Instant getEnd() {
-        Instant start = reference.minusSeconds(duration.getSeconds());
-        ZonedDateTime zdt = ZonedDateTime.ofInstant ( start , zoneId );
-        ZonedDateTime firstOfWeek = zdt.with ( ChronoField.DAY_OF_YEAR , 1 ); // ISO 8601, Monday is first day of week.
-        firstOfWeek = firstOfWeek.toLocalDate ().atStartOfDay ( zoneId );
-        ZonedDateTime firstOfNextWeek = firstOfWeek.plusYears ( 1 );
-        return firstOfNextWeek.toInstant();
+        return getFirstOfYear().plusYears(1).toInstant();
     }
 }

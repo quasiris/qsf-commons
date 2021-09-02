@@ -10,6 +10,21 @@ import static org.junit.Assert.*;
 
 public class HumanDateParserTest {
     @Test
+    public void  testFuture() {
+        HumanDateParser parser = new HumanDateParser("zukunft");
+        parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
+        assertEquals("2021-02-10T10:15:30Z", parser.getStart().toString());
+        assertEquals(Instant.MAX, parser.getEnd());
+    }
+    @Test
+    public void  testPast() {
+        HumanDateParser parser = new HumanDateParser("vergangenheit");
+        parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
+        assertEquals(Instant.MIN, parser.getStart());
+        assertEquals("2021-02-10T10:15:30Z", parser.getEnd().toString());
+    }
+
+    @Test
     public void  testHeute() {
         HumanDateParser parser = new HumanDateParser("heute");
         parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));

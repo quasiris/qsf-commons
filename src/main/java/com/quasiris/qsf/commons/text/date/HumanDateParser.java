@@ -20,6 +20,10 @@ public class HumanDateParser {
 
     private static Map<String, DateParser> durationMap = new HashMap<>();
     static {
+        durationMap.put("vergangenheit", new PastParser());
+        durationMap.put("past", new PastParser());
+        durationMap.put("zukunft", new FutureParser());
+        durationMap.put("future", new FutureParser());
         durationMap.put("last day", new DurationDateParser("P1D"));
         durationMap.put("yesterday", new DayDateParser("P1D"));
         durationMap.put("gestern", new DayDateParser("P1D"));

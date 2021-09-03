@@ -27,6 +27,6 @@ public class FutureParser implements DateParser {
 
     @Override
     public Instant getEnd() {
-        return Instant.MAX;
+        return Instant.ofEpochSecond(253402210800L);
     }
 }

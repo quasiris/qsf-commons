@@ -22,7 +22,7 @@ public class PastParser implements DateParser {
 
     @Override
     public Instant getStart() {
-        return Instant.MIN;
+        return Instant.ofEpochSecond(-62167222408L);
     }
 
 

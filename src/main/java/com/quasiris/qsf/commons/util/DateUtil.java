@@ -94,5 +94,14 @@ public class DateUtil {
         return getDate(new Date());
     }
 
+    // 0000-01-01
+    public static Date min() {
+        return new Date(-62167222408L);
+    }
+
+    // 9999-12-31
+    public static Date max() {
+        return new Date(253402210800000L);
+    }
 
 }

@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class HumanDateParserTest {
@@ -14,13 +14,13 @@ public class HumanDateParserTest {
         HumanDateParser parser = new HumanDateParser("zukunft");
         parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
         assertEquals("2021-02-10T10:15:30Z", parser.getStart().toString());
-        assertEquals(Instant.MAX, parser.getEnd());
+        assertEquals("9999-12-30T23:00:00Z", parser.getEnd().toString());
     }
     @Test
     public void  testPast() {
         HumanDateParser parser = new HumanDateParser("vergangenheit");
         parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
-        assertEquals(Instant.MIN, parser.getStart());
+        assertEquals("-0001-12-31T23:06:32Z", parser.getStart().toString());
         assertEquals("2021-02-10T10:15:30Z", parser.getEnd().toString());
     }
 

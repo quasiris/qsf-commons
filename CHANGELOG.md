@@ -3,6 +3,10 @@ All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
 ### Added
+
+
+## [1.1.0]
+### Added
 - add human date parser for future and past
 
 ## [1.1.0]

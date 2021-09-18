@@ -3,7 +3,7 @@ All notable changes in this project will be documented in this file.
 
 ## [UNRELEASED]
 ### Added
-
+- implement a method to read a string from the classpath
 
 ## [1.1.0]
 ### Added

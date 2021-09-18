@@ -123,7 +123,17 @@ public class IOUtils {
     }
 
     public static String getString(String location) throws IOException {
+        if(location.startsWith("classpath://")) {
+            return getStringFromClassPath(location.replace("classpath://", "/"));
+
+        }
         return FileUtils.readFileToString(new File(location), Charset.forName("UTF-8"));
+    }
+
+
+    public static String getStringFromClassPath(String location) throws IOException {
+        InputStream is = IOUtils.class.getResourceAsStream(location);
+        return inputStreamToString(is);
     }
 
 

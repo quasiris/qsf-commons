@@ -77,6 +77,9 @@ public class DateUtil {
         return getDate(date, ELASTIC_DATE_PATTERN_MICROSECONDS);
     }
     public static String getDate(Date date, String pattern) {
+        if(date == null) {
+            return null;
+        }
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
         return formatter.format(date);
     }

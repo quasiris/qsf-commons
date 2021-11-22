@@ -38,4 +38,10 @@ public class DateUtilTest {
         String dateString = DateUtil.getDate(date);
         assertNotNull(dateString);
     }
+    @Test
+    public void getDateAsStringNull() throws Exception {
+        Date date = null;
+        String dateString = DateUtil.getDate(date);
+        assertNull(dateString);
+    }
 }

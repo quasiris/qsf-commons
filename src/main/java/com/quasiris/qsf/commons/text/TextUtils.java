@@ -114,19 +114,20 @@ public class TextUtils {
      * @return transformed text
      */
     public static String limit(String text, int maxLength, String punctuation) {
-        if(StringUtils.isNotEmpty(text)) {
-            if(StringUtils.isNotEmpty(punctuation)) {
-                maxLength -= punctuation.length();
-            }
-
-            text = StringUtils.substring(text, 0, maxLength);
-            text = removeLastToken(text);
-
-            if(StringUtils.isNotEmpty(punctuation)) {
-                text += punctuation;
-            }
+        if(text == null) {
+            return null;
+        }
+        if(text.length() <= maxLength) {
+            return text;
         }
 
+        maxLength -= punctuation.length();
+        text = StringUtils.substring(text, 0, maxLength);
+        text = removeLastToken(text);
+
+        if(StringUtils.isNotEmpty(punctuation)) {
+            text += punctuation;
+        }
         return text;
     }
 

@@ -1,8 +1,10 @@
 package com.quasiris.qsf.commons.text.transform.filter;
 
 import com.quasiris.qsf.commons.text.transform.TransformerFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RemoveCharTransformerFilterTest {
 
@@ -10,13 +12,13 @@ public class RemoveCharTransformerFilterTest {
     @Test
     public void transformNull() {
         TransformerFilter transformrFilter = new RemoveCharTransformerFilter();
-        Assert.assertNull(transformrFilter.transform(null));
+        assertNull(transformrFilter.transform(null));
     }
 
     @Test
     public void transform() {
         TransformerFilter transformrFilter = new RemoveCharTransformerFilter();
-        Assert.assertEquals("foo", transformrFilter.transform("_f_oo_"));
+        assertEquals("foo", transformrFilter.transform("_f_oo_"));
     }
 
 }

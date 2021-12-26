@@ -1,10 +1,10 @@
 package com.quasiris.qsf.commons.util;
 
-import org.junit.Test;
 
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.Date;
-
-import static org.junit.Assert.*;
 
 public class DateUtilTest {
 

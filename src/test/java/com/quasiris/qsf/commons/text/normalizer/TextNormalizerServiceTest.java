@@ -1,17 +1,18 @@
 package com.quasiris.qsf.commons.text.normalizer;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextNormalizerServiceTest {
     Map<String, TextNormalizerService> textNormalizers;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         textNormalizers = new HashMap<>();
 

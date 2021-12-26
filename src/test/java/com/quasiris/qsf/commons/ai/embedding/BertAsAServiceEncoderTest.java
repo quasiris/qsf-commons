@@ -3,18 +3,19 @@ package com.quasiris.qsf.commons.ai.embedding;
 import com.quasiris.qsf.commons.ai.dto.Document;
 import com.quasiris.qsf.commons.ai.dto.TextVector;
 import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BertAsAServiceEncoderTest {
     BertAsAServiceEncoder encoder = new BertAsAServiceEncoder("http://localhost:8125/encode", 30000);
 
-    @Ignore // require external service for test
+    @Disabled // require external service for test
     @Test
     public void embed() {
         List<TextVector> textVectors = encoder.embed("convert this text into a vector please", null, false);
@@ -22,7 +23,7 @@ public class BertAsAServiceEncoderTest {
         assertNotNull(textVectors);
     }
 
-    @Ignore // require external service for test
+    @Disabled // require external service for test
     @Test
     public void embedDoc() {
         Document doc = new Document("example-doc");
@@ -35,7 +36,7 @@ public class BertAsAServiceEncoderTest {
         assertEquals(2, vectorDoc.getFields().size());
     }
 
-    @Ignore // require external service for test
+    @Disabled // require external service for test
     @Test
     public void embedBulk() {
         List<Document<String>> docs = new ArrayList<>();

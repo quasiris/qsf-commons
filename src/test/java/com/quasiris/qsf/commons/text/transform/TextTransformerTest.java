@@ -1,9 +1,10 @@
 package com.quasiris.qsf.commons.text.transform;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextTransformerTest {
 
@@ -12,7 +13,7 @@ public class TextTransformerTest {
 
         TextTransformer transform = TextTransformerFactory.create("lowerCase|trim|removeSpecialChars|removeNumbers");
         String actual = transform.normalize(" fOo.§ba12%r.");
-        Assert.assertEquals("foobar", actual);
+        assertEquals("foobar", actual);
     }
 
 
@@ -22,12 +23,11 @@ public class TextTransformerTest {
 
         TextTransformer transform = TextTransformerFactory.create("lowerCase|trim|removeSpecialChars|removeNumbers|myFunction");
         String actual = transform.normalize(" fOo.§ba12%r.");
-        Assert.assertEquals("foobarfoobar", actual);
+        assertEquals("foobarfoobar", actual);
     }
 
     Function<String, String> myFunction =
             parameter -> parameter.toLowerCase() + parameter;
-
 
 
     @Test
@@ -43,7 +43,7 @@ public class TextTransformerTest {
                 build();
 
         String actual = transform.normalize(" fOo.§ba12%r.");
-        Assert.assertEquals("foobarfoobar", actual);
+        assertEquals("foobarfoobar", actual);
     }
 
 }

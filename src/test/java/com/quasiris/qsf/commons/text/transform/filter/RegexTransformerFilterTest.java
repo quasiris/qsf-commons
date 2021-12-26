@@ -1,8 +1,10 @@
 package com.quasiris.qsf.commons.text.transform.filter;
 
 import com.quasiris.qsf.commons.text.transform.TransformerFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RegexTransformerFilterTest {
 
@@ -10,12 +12,12 @@ public class RegexTransformerFilterTest {
     @Test
     public void transformNull() {
         TransformerFilter transformrFilter = new RegexTransformerFilter("");
-        Assert.assertNull(transformrFilter.transform(null));
+        assertNull(transformrFilter.transform(null));
     }
 
     @Test
     public void transform() {
         TransformerFilter transformrFilter = new RegexTransformerFilter("\\d+");
-        Assert.assertEquals("foo", transformrFilter.transform("foo123"));
+        assertEquals("foo", transformrFilter.transform("foo123"));
     }
 }

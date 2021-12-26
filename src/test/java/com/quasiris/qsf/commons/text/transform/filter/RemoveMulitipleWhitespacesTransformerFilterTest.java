@@ -1,8 +1,10 @@
 package com.quasiris.qsf.commons.text.transform.filter;
 
 import com.quasiris.qsf.commons.text.transform.TransformerFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RemoveMulitipleWhitespacesTransformerFilterTest {
 
@@ -10,24 +12,24 @@ public class RemoveMulitipleWhitespacesTransformerFilterTest {
     @Test
     public void transformNull() {
         TransformerFilter transformrFilter = new RemoveMultipleWhitespacesTransformerFilter();
-        Assert.assertNull(transformrFilter.transform(null));
+        assertNull(transformrFilter.transform(null));
     }
 
     @Test
     public void transform() {
         TransformerFilter transformrFilter = new RemoveMultipleWhitespacesTransformerFilter();
-        Assert.assertEquals("foo Bar ", transformrFilter.transform("foo    Bar "));
+        assertEquals("foo Bar ", transformrFilter.transform("foo    Bar "));
     }
 
     @Test
     public void transformMultipleWhitespacesAtTheEnd() {
         TransformerFilter transformrFilter = new RemoveMultipleWhitespacesTransformerFilter();
-        Assert.assertEquals("Bar ", transformrFilter.transform("Bar  "));
+        assertEquals("Bar ", transformrFilter.transform("Bar  "));
     }
 
     @Test
     public void transformSingleWhitespace() {
         TransformerFilter transformrFilter = new RemoveMultipleWhitespacesTransformerFilter();
-        Assert.assertEquals(" ", transformrFilter.transform(" "));
+        assertEquals(" ", transformrFilter.transform(" "));
     }
 }

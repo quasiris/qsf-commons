@@ -1,8 +1,10 @@
 package com.quasiris.qsf.commons.text.transform.filter;
 
 import com.quasiris.qsf.commons.text.transform.TransformerFilter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UpperCaseTransformerFilterTest {
 
@@ -10,13 +12,13 @@ public class UpperCaseTransformerFilterTest {
     @Test
     public void transformNull() {
         TransformerFilter transformrFilter = new UpperCaseTransformerFilter();
-        Assert.assertNull(transformrFilter.transform(null));
+        assertNull(transformrFilter.transform(null));
     }
 
     @Test
     public void transform() {
         TransformerFilter transformrFilter = new UpperCaseTransformerFilter();
-        Assert.assertEquals("FOO", transformrFilter.transform("Foo"));
+        assertEquals("FOO", transformrFilter.transform("Foo"));
     }
 
 }

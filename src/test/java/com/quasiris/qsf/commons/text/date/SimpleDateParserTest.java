@@ -1,10 +1,11 @@
 package com.quasiris.qsf.commons.text.date;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.time.temporal.ChronoUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleDateParserTest {
     @Test

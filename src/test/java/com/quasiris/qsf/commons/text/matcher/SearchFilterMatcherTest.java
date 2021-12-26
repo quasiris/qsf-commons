@@ -3,17 +3,18 @@ package com.quasiris.qsf.commons.text.matcher;
 import com.quasiris.qsf.dto.query.FilterOperator;
 import com.quasiris.qsf.dto.query.SearchFilterDTO;
 import com.quasiris.qsf.dto.response.Document;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SearchFilterMatcherTest {
     private Document doc;
 
-    @Before
+    @BeforeEach
     public void before() {
         doc = new Document();
         doc.getDocument().put("title", "Samsung Galaxy S21 Ultra 5G 512 GB");
@@ -395,9 +396,9 @@ public class SearchFilterMatcherTest {
         searchFilter.setMaxValue(null);
         searchFilter.setName("speicher");
 
-        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,127.0)));
-        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,128.0)));
-        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,129.0)));
+        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 127.0)));
+        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 128.0)));
+        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 129.0)));
     }
 
     @Test
@@ -409,9 +410,9 @@ public class SearchFilterMatcherTest {
         searchFilter.setName("speicher");
         searchFilter.setFilterOperator(FilterOperator.NOT);
 
-        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,127.0)));
-        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,128.0)));
-        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0 ,129.0)));
+        assertTrue(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 127.0)));
+        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 128.0)));
+        assertFalse(matcher.matchesRangeValue(searchFilter, Arrays.asList(126.0, 129.0)));
     }
 
     @Test

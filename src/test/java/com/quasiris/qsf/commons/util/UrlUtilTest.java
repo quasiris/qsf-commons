@@ -1,11 +1,12 @@
 package com.quasiris.qsf.commons.util;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UrlUtilTest {
 
@@ -14,6 +15,7 @@ public class UrlUtilTest {
         String url = UrlUtil.removePassword("https://myUser:myPassword@elastic.quasiris.de:9200/product-search");
         assertEquals("https://elastic.quasiris.de:9200/product-search", url);
     }
+
     @Test
     public void removePasswordFromUrlWithoutPassword() {
         String url = UrlUtil.removePassword("https://elastic.quasiris.de:9200/product-search");
@@ -32,6 +34,7 @@ public class UrlUtilTest {
         assertEquals("B%C3%A4r", valuesEncoded.get("name"));
         assertEquals(1, valuesEncoded.get("number"));
     }
+
     @Test
     public void encodeMapWithSuffix() {
         Map<String, Object> values = new HashMap<>();

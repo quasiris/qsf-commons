@@ -1,19 +1,27 @@
 package com.quasiris.qsf.commons.util;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by mki on 23.12.17.
- */
-public class JsonUtil {
 
-    public static String toPrettyString(Object object) {
+public class JsonUtil {
+    private static ObjectMapper mapper = new ObjectMapper();
+
+    public static String toJson(Object object) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            String pretty = mapper.writeValueAsString(object);
+            return pretty;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String toPrettyJson(Object object) {
+        try {
             String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
             return pretty;
         } catch (Exception e) {
@@ -21,9 +29,21 @@ public class JsonUtil {
         }
     }
 
+    public static <T> T fromJson(String jsonString) {
+        try {
+            return mapper.readValue(jsonString, new TypeReference<T>() {});
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Deprecated // use toPrettyJson
+    public static String toPrettyString(Object object) {
+        return toPrettyJson(object);
+    }
+
     public static Object toJson(String jsonString) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
             return mapper.readTree(jsonString);
         } catch (Exception e) {
             throw new RuntimeException(e);

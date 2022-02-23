@@ -112,7 +112,12 @@
             <artifactId>lucene-analyzers-common</artifactId>
             <version>${lucene.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.5.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

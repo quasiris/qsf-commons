@@ -13,20 +13,23 @@ import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 import com.quasiris.qsf.commons.util.EmbeddingUtil;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -67,14 +70,14 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
                     request.setEntity(requestEntity);
                     request.addHeader("Content-Type", "application/json");
                     RequestConfig.Builder requestConfig = RequestConfig.custom();
-                    requestConfig.setConnectTimeout(timeout);
-                    requestConfig.setConnectionRequestTimeout(timeout);
-                    requestConfig.setSocketTimeout(timeout);
+                    requestConfig.setConnectTimeout(Timeout.ofMilliseconds(timeout));
+                    requestConfig.setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout));
+                    requestConfig.setResponseTimeout(Timeout.ofMilliseconds(timeout));
                     request.setConfig(requestConfig.build());
                     try (CloseableHttpClient httpClient = HttpClients.createDefault();
                          CloseableHttpResponse response = httpClient.execute(request)) {
                         HttpEntity entity = response.getEntity();
-                        if (entity != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        if (entity != null && response.getCode() == HttpStatus.SC_OK) {
                             String jsonResult = EntityUtils.toString(entity);
                             Map<String, Object> responseBody = objectMapper.readValue(jsonResult, Map.class);
                             if (responseBody.containsKey("outputs")) {
@@ -85,7 +88,7 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
                                 }
                             }
                         }
-                    } catch (IOException e) {
+                    } catch (IOException | ParseException e) {
                         logger.warn("Something gone wrong in GET document for UniversalSentenceEncoder!", e);
                     }
                 } catch (JsonProcessingException e) {
@@ -122,6 +125,6 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
         inputMap.put("text", Arrays.asList(text));
         body.put("inputs", inputMap);
         String payload = objectMapper.writeValueAsString(body);
-        return new StringEntity(payload, "UTF-8");
+        return new StringEntity(payload, StandardCharsets.UTF_8);
     }
 }

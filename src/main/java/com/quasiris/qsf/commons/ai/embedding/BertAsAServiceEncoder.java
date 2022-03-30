@@ -16,6 +16,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -83,7 +84,7 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
             HttpEntity requestEntity = buildEntity(allSentences);
             HttpPost request = new HttpPost(baseUrl);
             request.setEntity(requestEntity);
-            request.addHeader("Content-Type", "application/json");
+            request.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
             RequestConfig.Builder requestConfig = RequestConfig.custom();
             requestConfig.setConnectTimeout(Timeout.ofMilliseconds(timeout));
             requestConfig.setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout));

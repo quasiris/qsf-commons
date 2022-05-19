@@ -1,7 +1,9 @@
 package com.quasiris.qsf.commons.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -9,7 +11,16 @@ import java.util.stream.Collectors;
 
 
 public class JsonUtil {
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper;
+    static {{
+        mapper = new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }}
+
+    public static ObjectMapper getDefaultMapper() {
+        return mapper;
+    }
 
     public static String toJson(Object object) {
         try {

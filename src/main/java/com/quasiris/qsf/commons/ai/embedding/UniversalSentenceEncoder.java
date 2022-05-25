@@ -2,7 +2,6 @@ package com.quasiris.qsf.commons.ai.embedding;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quasiris.qsf.commons.ai.dto.Document;
 import com.quasiris.qsf.commons.ai.dto.TextVector;
 import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
@@ -11,6 +10,7 @@ import com.quasiris.qsf.commons.nlp.SentenceSplitter;
 import com.quasiris.qsf.commons.text.TextSplitter;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 import com.quasiris.qsf.commons.util.EmbeddingUtil;
+import com.quasiris.qsf.commons.util.JsonUtil;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -47,12 +47,10 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
 
     private String baseUrl;
     private Integer timeout;
-    private ObjectMapper objectMapper;
 
     public UniversalSentenceEncoder(String baseUrl, Integer timeout) {
         this.baseUrl = baseUrl;
         this.timeout = timeout;
-        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -80,7 +78,7 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
                         HttpEntity entity = response.getEntity();
                         if (entity != null && response.getCode() == HttpStatus.SC_OK) {
                             String jsonResult = EntityUtils.toString(entity);
-                            Map<String, Object> responseBody = objectMapper.readValue(jsonResult, Map.class);
+                            Map<String, Object> responseBody = JsonUtil.defaultMapper().readValue(jsonResult, Map.class);
                             if (responseBody.containsKey("outputs")) {
                                 List<Object> outputs = (List<Object>) responseBody.get("outputs");
                                 if (outputs.size() == 1) {
@@ -125,7 +123,7 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
         HashMap<String, List<String>> inputMap = new HashMap<>();
         inputMap.put("text", Arrays.asList(text));
         body.put("inputs", inputMap);
-        String payload = objectMapper.writeValueAsString(body);
+        String payload = JsonUtil.defaultMapper().writeValueAsString(body);
         return new StringEntity(payload, StandardCharsets.UTF_8);
     }
 }

@@ -49,8 +49,8 @@ class JsonUtilTest {
         Map<String, Object> expectedDoc = createDoc();
 
         // when
-        Map<String, Object> objFromJson = JsonUtil.fromJson(json);
-        Object objFromPrettyJson = JsonUtil.fromJson(prettyJson);
+        Map<String, Object> objFromJson = JsonUtil.fromJson(json, Map.class);
+        Object objFromPrettyJson = JsonUtil.fromJson(prettyJson, Object.class);
 
         // then
         assertEquals(expectedDoc, objFromJson);

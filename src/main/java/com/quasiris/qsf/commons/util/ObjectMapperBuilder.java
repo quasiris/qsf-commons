@@ -3,6 +3,7 @@ package com.quasiris.qsf.commons.util;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@Deprecated // use JsonUtil
 public class ObjectMapperBuilder {
 
     private static final ObjectMapper defaultMapper;

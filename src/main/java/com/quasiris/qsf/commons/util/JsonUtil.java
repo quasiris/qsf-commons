@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -15,10 +16,11 @@ public class JsonUtil {
     static {{
         mapper = new ObjectMapper()
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }}
 
-    public static ObjectMapper getDefaultMapper() {
+    public static ObjectMapper defaultMapper() {
         return mapper;
     }
 
@@ -27,7 +29,7 @@ public class JsonUtil {
             String pretty = mapper.writeValueAsString(object);
             return pretty;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error during Json serialization!", e);
         }
     }
 
@@ -36,15 +38,32 @@ public class JsonUtil {
             String pretty = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
             return pretty;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error during Json serialization!", e);
         }
     }
 
+    @Deprecated // remove this
     public static <T> T fromJson(String jsonString) {
         try {
             return mapper.readValue(jsonString, new TypeReference<T>() {});
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error during Json de-serialization!", e);
+        }
+    }
+
+    public static <T> T fromJson(String jsonString, TypeReference<T> typeReference) {
+        try {
+            return mapper.readValue(jsonString, typeReference);
+        } catch (Exception e) {
+            throw new RuntimeException("Error during Json de-serialization!", e);
+        }
+    }
+
+    public static <T> T fromJson(String jsonString, Class<T> cls) {
+        try {
+            return mapper.readValue(jsonString, cls);
+        } catch (Exception e) {
+            throw new RuntimeException("Error during Json de-serialization!", e);
         }
     }
 
@@ -53,6 +72,15 @@ public class JsonUtil {
         return toPrettyJson(object);
     }
 
+    public static JsonNode parseJson(String jsonString) {
+        try {
+            return mapper.readTree(jsonString);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Deprecated // use parseJson
     public static Object toJson(String jsonString) {
         try {
             return mapper.readTree(jsonString);

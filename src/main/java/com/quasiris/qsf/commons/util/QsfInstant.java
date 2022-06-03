@@ -5,6 +5,7 @@ import java.time.Instant;
 /**
  * Created by tbl on 23.05.19.
  */
+@Deprecated // TODO discuss this
 public class QsfInstant {
 
     private static Instant now = null;

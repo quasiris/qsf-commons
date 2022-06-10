@@ -1,6 +1,9 @@
 package com.quasiris.qsf.commons.util;
 
 import org.junit.jupiter.api.Test;
+
+import java.net.URISyntaxException;
+
 import static org.junit.jupiter.api.Assertions.*;
 public class ElasticUtilTest {
 
@@ -61,5 +64,31 @@ public class ElasticUtilTest {
     public void escapeOR() throws Exception {
         String value = ElasticUtil.escape("16515 OR 0815");
         assertEquals("16515 \\OR 0815", value);
+    }
+
+    @Test
+    public void parseIndexFromUrl() throws URISyntaxException {
+        String expected = "foo";
+
+        String actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo");
+        assertEquals(expected, actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo/");
+        assertEquals(expected, actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo/bar");
+        assertEquals(expected, actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo/bar/");
+        assertEquals(expected, actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo/bar/?");
+        assertEquals(expected, actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo,foo2/bar/?");
+        assertEquals("foo,foo2", actual);
+
+        actual = ElasticUtil.parseIndexFromUrl("http://localhost/foo,foo2*/bar/?");
+        assertEquals("foo,foo2*", actual);
     }
 }

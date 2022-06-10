@@ -66,7 +66,7 @@ public class AsyncHttpClient implements AutoCloseable {
         return performAsyncRequest(httpRequest);
     }
 
-    private void appendHeadersAndPayload(SimpleRequestBuilder simpleRequestBuilder, @Nullable Object data, Header... headers) {
+    public static void appendHeadersAndPayload(SimpleRequestBuilder simpleRequestBuilder, @Nullable Object data, Header... headers) {
         for (Header header : headers) {
             simpleRequestBuilder.setHeader(header);
         }

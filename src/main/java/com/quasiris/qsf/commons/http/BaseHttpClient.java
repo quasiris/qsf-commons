@@ -71,7 +71,7 @@ public class BaseHttpClient implements HttpClient {
         return performRequest(httpPut, typeReference, true).getPayload();
     }
 
-    private void appendHeadersAndPayload(HttpUriRequestBase requestBase, @Nullable Object data, Header... headers) {
+    public static void appendHeadersAndPayload(HttpUriRequestBase requestBase, @Nullable Object data, Header... headers) {
         for (Header header : headers) {
             requestBase.setHeader(header);
         }
@@ -153,7 +153,7 @@ public class BaseHttpClient implements HttpClient {
         }
     }
 
-    private <T> HttpResponse<T> performRequest(HttpUriRequestBase request, @Nullable TypeReference<T> typeReference, boolean enableErrorHandler) {
+    public <T> HttpResponse<T> performRequest(HttpUriRequestBase request, @Nullable TypeReference<T> typeReference, boolean enableErrorHandler) {
         CloseableHttpResponse response = null;
         try {
             T result = null;

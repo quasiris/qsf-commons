@@ -5,14 +5,11 @@ import com.quasiris.qsf.commons.util.JsonUtil;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http2.HttpVersionPolicy;
 import org.apache.hc.core5.reactor.IOReactorConfig;
 import org.apache.hc.core5.util.Timeout;
@@ -21,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -63,26 +59,25 @@ public class AsyncHttpClient implements AutoCloseable {
     }
 
     public Future<SimpleHttpResponse> postAsync(String url, @Nullable Object data, Header... headers) {
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
-        appendHeadersAndPayload(httpPost, data, headers);
-        return performAsyncRequest(httpPost);
+        SimpleRequestBuilder simpleRequestBuilder = SimpleRequestBuilder.post(url)
+                .setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+        appendHeadersAndPayload(simpleRequestBuilder, data, headers);
+        SimpleHttpRequest httpRequest = simpleRequestBuilder.build();
+        return performAsyncRequest(httpRequest);
     }
 
-    private void appendHeadersAndPayload(HttpUriRequestBase requestBase, @Nullable Object data, Header... headers) {
+    private void appendHeadersAndPayload(SimpleRequestBuilder simpleRequestBuilder, @Nullable Object data, Header... headers) {
         for (Header header : headers) {
-            requestBase.setHeader(header);
+            simpleRequestBuilder.setHeader(header);
         }
         if (data != null) {
             String postString = data instanceof String ? data.toString() : JsonUtil.toJson(data);
-            StringEntity entity = new StringEntity(postString, StandardCharsets.UTF_8);
-            requestBase.setEntity(entity);
+            simpleRequestBuilder.setBody(postString, ContentType.APPLICATION_JSON);
         }
     }
 
-    public Future<SimpleHttpResponse> performAsyncRequest(HttpUriRequestBase request) {
-        SimpleHttpRequest simpleRequest = SimpleRequestBuilder.copy(request).build();
-        return httpClient.execute(simpleRequest, null);
+    public Future<SimpleHttpResponse> performAsyncRequest(SimpleHttpRequest httpRequest) {
+        return httpClient.execute(httpRequest, null);
     }
 
     public static <T> HttpResponse<T> waitForFutureResponse(Future<SimpleHttpResponse> future, @Nullable TypeReference<T> typeReference, @Nullable Long timeout, @Nullable Boolean parseResponseOnError) throws ExecutionException, InterruptedException, TimeoutException, IOException {

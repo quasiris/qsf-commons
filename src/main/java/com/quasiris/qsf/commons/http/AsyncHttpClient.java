@@ -71,7 +71,7 @@ public class AsyncHttpClient {
 
                 @Override
                 public void cancelled() {
-                    LOG.error("The async request was canceled.");
+                    LOG.error("The async request to URL {} was canceled.", url);
                 }
             });
         } finally {

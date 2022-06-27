@@ -2,7 +2,7 @@ package com.quasiris.qsf.commons.http;
 
 public class HttpClientFactory {
     private final static HttpClient httpClient = new DefaultHttpClient();
-    private final static AsyncHttpClient asyncHttpClient = new AsyncHttpClient(1000L);
+    private final static AsyncHttpClient asyncHttpClient = new AsyncHttpClient(4000L);
 
     public static HttpClient defaultClient() {
         return httpClient;

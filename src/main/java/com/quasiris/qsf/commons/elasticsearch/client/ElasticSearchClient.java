@@ -18,11 +18,7 @@ import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
  * Elastic client that access Search API
  * ref: https://www.elastic.co/guide/en/elasticsearch/reference/7.10/search-search.html
  */
-public class ElasticSearchClient extends ElasticBaseClient {
-    public ElasticSearchClient() {
-        ((DefaultHttpClient) getRestClient()).setParseResponseOnError(false);
-    }
-
+public class ElasticSearchClient {
     public ElasticResult search(String baseUrl, String index, String jsonQuery) throws ResourceNotFoundException {
         String indexUrl = baseUrl+"/"+index;
         return search(indexUrl, jsonQuery);
@@ -31,11 +27,15 @@ public class ElasticSearchClient extends ElasticBaseClient {
     public ElasticResult search(String indexUrl, String jsonQuery) throws ResourceNotFoundException {
         String apiUrl = indexUrl+"/_search";
         ElasticResult result = null;
-        HttpResponse<ElasticResult> httpResponse = getRestClient().postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
-        if(httpResponse.is2xx()) {
-            result = httpResponse.getPayload();
-        } else if(httpResponse.getStatusCode() == 404) {
-            throw new ResourceNotFoundException();
+        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+            HttpResponse<ElasticResult> httpResponse = restClient.postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
+            if(httpResponse.is2xx()) {
+                result = httpResponse.getPayload();
+            } else if(httpResponse.getStatusCode() == 404) {
+                throw new ResourceNotFoundException();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return result;
@@ -61,15 +61,18 @@ public class ElasticSearchClient extends ElasticBaseClient {
         HttpPost httpPost = new HttpPost(apiUrl);
         httpPost.setHeader("Content-Type", ContentType.APPLICATION_NDJSON.toString());
         BaseHttpClient.appendHeadersAndPayload(httpPost, jsonNd);
-        BaseHttpClient restClient = (BaseHttpClient) getRestClient();
 
-        // perform request
-        HttpResponse<MultiElasticResult> httpResponse = restClient.performRequest(httpPost, castTypeReference(MultiElasticResult.class), false);
         MultiElasticResult result = null;
-        if(httpResponse.is2xx()) {
-            result = httpResponse.getPayload();
-        } else if(httpResponse.getStatusCode() == 404) {
-            throw new ResourceNotFoundException();
+        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+            // perform request
+            HttpResponse<MultiElasticResult> httpResponse = restClient.performRequest(httpPost, castTypeReference(MultiElasticResult.class), false);
+            if (httpResponse.is2xx()) {
+                result = httpResponse.getPayload();
+            } else if (httpResponse.getStatusCode() == 404) {
+                throw new ResourceNotFoundException();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return result;

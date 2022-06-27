@@ -19,8 +19,6 @@ import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
  * - https://www.elastic.co/guide/en/elasticsearch/reference/current/aliases.html
  */
 public class ElasticAliasClient extends ElasticBaseClient {
-
-
     /**
      * Perform multiple alias actions as one transaction
      * ref:

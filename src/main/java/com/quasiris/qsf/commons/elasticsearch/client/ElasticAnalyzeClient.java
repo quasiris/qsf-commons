@@ -1,5 +1,6 @@
 package com.quasiris.qsf.commons.elasticsearch.client;
 
+import com.quasiris.qsf.commons.http.DefaultHttpClient;
 import com.quasiris.qsf.commons.http.HttpResponse;
 import com.quasiris.qsf.pipeline.filter.elastic.bean.Analyze;
 
@@ -14,13 +15,17 @@ import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
  * Elastic client that access the Analyze API
  * ref: https://www.elastic.co/guide/en/elasticsearch/reference/7.10/indices-analyze.html
  */
-public class ElasticAnalyzeClient extends ElasticBaseClient {
+public class ElasticAnalyzeClient {
     public Analyze analyze(String baseUrl, String payload) {
         String apiUrl = baseUrl+"/_analyze";
-        HttpResponse<Analyze> httpResponse = getRestClient().postForResponse(apiUrl, payload, castTypeReference(Analyze.class));
         Analyze analyze = null;
-        if(httpResponse.is2xx()) {
-            analyze = httpResponse.getPayload();
+        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+            HttpResponse<Analyze> httpResponse = restClient.postForResponse(apiUrl, payload, castTypeReference(Analyze.class));
+            if (httpResponse.is2xx()) {
+                analyze = httpResponse.getPayload();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return analyze;
     }
@@ -39,6 +44,12 @@ public class ElasticAnalyzeClient extends ElasticBaseClient {
             params.put("filter", filters);
         }
         params.put("text", text);
-        return getRestClient().postForResponse(apiUrl, params, castTypeReference(Map.class));
+        HttpResponse<Map> httpResponse = null;
+        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+            httpResponse = restClient.postForResponse(apiUrl, params, castTypeReference(Map.class));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return httpResponse;
     }
 }

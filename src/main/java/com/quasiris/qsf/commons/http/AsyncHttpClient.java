@@ -6,6 +6,7 @@ import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
 import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
@@ -34,19 +35,22 @@ public class AsyncHttpClient {
     }
 
     public void postAsyncWithoutResponse(String url, @Nullable Object data, Header... headers) {
-        RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofMilliseconds(timeout))
-                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
-                .setResponseTimeout(Timeout.ofMilliseconds(timeout)).build();
-        IOReactorConfig reactorConfig = IOReactorConfig.custom()
-                .setSelectInterval(Timeout.ofMilliseconds(timeout))
-                .setSoTimeout(Timeout.ofMilliseconds(timeout))
-                .build();
-        CloseableHttpAsyncClient client = HttpAsyncClients.custom()
-                .setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_1)
-                .setIOReactorConfig(reactorConfig)
-                .setDefaultRequestConfig(config)
-                .build();
+        HttpAsyncClientBuilder asyncClientBuilder = HttpAsyncClients.custom()
+                .setVersionPolicy(HttpVersionPolicy.FORCE_HTTP_1);
+        if(timeout != null) {
+            RequestConfig config = RequestConfig.custom()
+                    .setConnectTimeout(Timeout.ofMilliseconds(timeout))
+                    .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeout))
+                    .setResponseTimeout(Timeout.ofMilliseconds(timeout)).build();
+            IOReactorConfig reactorConfig = IOReactorConfig.custom()
+                    .setSelectInterval(Timeout.ofMilliseconds(timeout))
+                    .setSoTimeout(Timeout.ofMilliseconds(timeout))
+                    .build();
+            asyncClientBuilder
+                    .setIOReactorConfig(reactorConfig)
+                    .setDefaultRequestConfig(config);
+        }
+        CloseableHttpAsyncClient client = asyncClientBuilder.build();
         try {
             client.start();
             SimpleRequestBuilder simpleRequestBuilder = SimpleRequestBuilder.post(url)

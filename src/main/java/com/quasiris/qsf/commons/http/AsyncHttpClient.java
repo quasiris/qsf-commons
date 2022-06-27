@@ -66,7 +66,7 @@ public class AsyncHttpClient {
 
                 @Override
                 public void failed(Exception e) {
-                    LOG.error("The async request failed because " + e.getMessage(), e);
+                    LOG.error("The async request to URL "+url+" failed because " + e.getMessage(), e);
                 }
 
                 @Override

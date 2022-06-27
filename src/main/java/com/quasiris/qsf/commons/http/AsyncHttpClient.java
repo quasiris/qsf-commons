@@ -51,32 +51,31 @@ public class AsyncHttpClient {
                     .setDefaultRequestConfig(config);
         }
         CloseableHttpAsyncClient client = asyncClientBuilder.build();
-        try {
-            client.start();
-            SimpleRequestBuilder simpleRequestBuilder = SimpleRequestBuilder.post(url)
-                    .setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
-            appendHeadersAndPayload(simpleRequestBuilder, data, headers);
-            SimpleHttpRequest request = simpleRequestBuilder.build();
+        client.start();
+        SimpleRequestBuilder simpleRequestBuilder = SimpleRequestBuilder.post(url)
+                .setHeader("Content-Type", ContentType.APPLICATION_JSON.toString());
+        appendHeadersAndPayload(simpleRequestBuilder, data, headers);
+        SimpleHttpRequest request = simpleRequestBuilder.build();
 
-            Future<SimpleHttpResponse> future = client.execute(request, new FutureCallback<SimpleHttpResponse>() {
-                @Override
-                public void completed(SimpleHttpResponse simpleHttpResponse) {
-                    LOG.debug("The async request finished successful with code: " + simpleHttpResponse.getCode());
-                }
+        Future<SimpleHttpResponse> future = client.execute(request, new FutureCallback<SimpleHttpResponse>() {
+            @Override
+            public void completed(SimpleHttpResponse simpleHttpResponse) {
+                LOG.debug("The async request finished successful with code: " + simpleHttpResponse.getCode());
+                client.close(CloseMode.GRACEFUL);
+            }
 
-                @Override
-                public void failed(Exception e) {
-                    LOG.error("The async request to URL "+url+" failed because " + e.getMessage(), e);
-                }
+            @Override
+            public void failed(Exception e) {
+                LOG.error("The async request to URL "+url+" failed because " + e.getMessage(), e);
+                client.close(CloseMode.GRACEFUL);
+            }
 
-                @Override
-                public void cancelled() {
-                    LOG.error("The async request to URL {} was canceled.", url);
-                }
-            });
-        } finally {
-            client.close(CloseMode.GRACEFUL);
-        }
+            @Override
+            public void cancelled() {
+                LOG.error("The async request to URL {} was canceled.", url);
+                client.close(CloseMode.GRACEFUL);
+            }
+        });
     }
 
     public static void appendHeadersAndPayload(SimpleRequestBuilder simpleRequestBuilder, @Nullable Object data, Header... headers) {

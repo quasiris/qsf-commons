@@ -1,9 +1,11 @@
 package com.quasiris.qsf.commons.exception;
 
+import java.io.IOException;
+
 /**
  * Thrown when a resource was not found
  */
-public class ResourceNotFoundException extends QsfException {
+public class ResourceNotFoundException extends IOException {
     public ResourceNotFoundException() {
         super();
     }
@@ -18,9 +20,5 @@ public class ResourceNotFoundException extends QsfException {
 
     public ResourceNotFoundException(Throwable cause) {
         super(cause);
-    }
-
-    protected ResourceNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

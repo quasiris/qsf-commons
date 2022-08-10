@@ -1,18 +1,24 @@
 package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
+import com.quasiris.qsf.commons.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.cache.Cache;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +91,7 @@ public class JavaHttpClient {
                 httpResponse = send(request, typeReference);
             } catch (IOException | InterruptedException e) {
                 boolean hasRetriesLeft = i <= numRetries;
-                if(hasRetriesLeft) {
+                if(hasRetriesLeft && shouldRetry(httpResponse)) {
                     LOG.warn("Retry failed request with reason:", e);
                     continue; // retry
                 } else {
@@ -109,6 +115,16 @@ public class JavaHttpClient {
         return httpResponse;
     }
 
+    private <T> boolean shouldRetry(HttpResponse<T> httpResponse) {
+        boolean shouldRetry = true;
+        if(httpResponse != null) {
+            if(httpResponse.statusCode() == 404) {
+                shouldRetry = false;
+            }
+        }
+        return shouldRetry;
+    }
+
     protected <T> HttpResponse<T> send(HttpRequest request, @Nullable TypeReference<T> typeReference) throws IOException, InterruptedException {
         HttpResponse<T> httpResponse = null;
 
@@ -126,9 +142,13 @@ public class JavaHttpClient {
             httpResponse = client.send(request, new JsonBodyHandler<>(typeReference));
         }
 
-        // update cache
-        if(cache != null && is2xx(httpResponse)) {
-            cache.put(hash, httpResponse);
+        if(httpResponse != null && httpResponse.statusCode() < 400) {
+            // update cache
+            if(cache != null) {
+                cache.put(hash, httpResponse);
+            }
+        } else {
+            throw new IOException("Http response failed! statusCode is >= 400");
         }
 
         return httpResponse;

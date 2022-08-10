@@ -4,11 +4,13 @@ import com.quasiris.qsf.commons.exception.ResourceNotFoundException;
 import com.quasiris.qsf.commons.http.BaseHttpClient;
 import com.quasiris.qsf.commons.http.DefaultHttpClient;
 import com.quasiris.qsf.commons.http.HttpResponse;
+import com.quasiris.qsf.commons.http.java.JavaHttpClient;
 import com.quasiris.qsf.pipeline.filter.elastic.bean.ElasticResult;
 import com.quasiris.qsf.pipeline.filter.elastic.bean.MultiElasticResult;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.core5.http.ContentType;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
@@ -19,6 +21,14 @@ import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
  * ref: https://www.elastic.co/guide/en/elasticsearch/reference/7.10/search-search.html
  */
 public class ElasticSearchClient {
+    JavaHttpClient httpClient;
+
+    boolean useApacheClient = true;
+
+    public ElasticSearchClient() {
+        httpClient = new JavaHttpClient();
+    }
+
     public ElasticResult search(String baseUrl, String index, String jsonQuery) throws ResourceNotFoundException {
         String indexUrl = baseUrl+"/"+index;
         return search(indexUrl, jsonQuery);
@@ -27,17 +37,28 @@ public class ElasticSearchClient {
     public ElasticResult search(String indexUrl, String jsonQuery) throws ResourceNotFoundException {
         String apiUrl = indexUrl+"/_search";
         ElasticResult result = null;
-        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
-            HttpResponse<ElasticResult> httpResponse = restClient.postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
-            if(httpResponse.is2xx()) {
-                result = httpResponse.getPayload();
-            } else if(httpResponse.getStatusCode() == 404) {
-                throw new ResourceNotFoundException();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
+        if(useApacheClient) {
+            try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+                HttpResponse<ElasticResult> httpResponse = restClient.postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
+                if (httpResponse.is2xx()) {
+                    result = httpResponse.getPayload();
+                } else if (httpResponse.getStatusCode() == 404) {
+                    throw new ResourceNotFoundException();
+                } else if (httpResponse.getStatusCode() >= 400) {
+                    throw new RuntimeException("Error for http request! Url: "+apiUrl+" return code: "+httpResponse.getStatusCode());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                java.net.http.HttpResponse<ElasticResult> httpResponse = httpClient.post(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
+                result = httpResponse.body();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return result;
     }
 
@@ -63,18 +84,36 @@ public class ElasticSearchClient {
         BaseHttpClient.appendHeadersAndPayload(httpPost, jsonNd);
 
         MultiElasticResult result = null;
-        try (DefaultHttpClient restClient = new DefaultHttpClient()) {
-            // perform request
-            HttpResponse<MultiElasticResult> httpResponse = restClient.performRequest(httpPost, castTypeReference(MultiElasticResult.class), false);
-            if (httpResponse.is2xx()) {
-                result = httpResponse.getPayload();
-            } else if (httpResponse.getStatusCode() == 404) {
-                throw new ResourceNotFoundException();
+        if(useApacheClient) {
+            try (DefaultHttpClient restClient = new DefaultHttpClient()) {
+                // perform request
+                HttpResponse<MultiElasticResult> httpResponse = restClient.performRequest(httpPost, castTypeReference(MultiElasticResult.class), false);
+                if (httpResponse.is2xx()) {
+                    result = httpResponse.getPayload();
+                } else if (httpResponse.getStatusCode() == 404) {
+                    throw new ResourceNotFoundException();
+                } else if (httpResponse.getStatusCode() >= 400) {
+                    throw new RuntimeException("Error for http request! Url: "+apiUrl+" return code: "+httpResponse.getStatusCode());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } else {
+            try {
+                java.net.http.HttpResponse<MultiElasticResult> httpResponse = httpClient.post(apiUrl, jsonNd, castTypeReference(MultiElasticResult.class), "Content-Type: "+ContentType.APPLICATION_NDJSON);
+                result = httpResponse.body();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-
         return result;
+    }
+
+    public boolean isUseApacheClient() {
+        return useApacheClient;
+    }
+
+    public void setUseApacheClient(boolean useApacheClient) {
+        this.useApacheClient = useApacheClient;
     }
 }

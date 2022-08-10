@@ -1,8 +1,16 @@
 package com.quasiris.qsf.commons.util;
 
+import com.quasiris.qsf.dto.common.MultiMap;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UrlUtil {
@@ -40,5 +48,48 @@ public class UrlUtil {
         } catch (UnsupportedEncodingException e) {
             return value;
         }
+    }
+
+    public static String buildQuerystring(MultiMap<String, Object> params) {
+        String querystring = "";
+        if(params != null && params.entrySet() != null) {
+            for (Map.Entry<String, List<Object>> entry : params.entrySet()) {
+                String key = UrlUtil.encode(entry.getKey());
+                for (Object o : entry.getValue()) {
+                    String value = UrlUtil.encode(o.toString());
+                    querystring += key+"="+value+"&";
+                }
+            }
+        }
+        if(querystring.endsWith("&")) {
+            querystring = querystring.substring(0, querystring.length() - 1);
+        }
+        return querystring;
+    }
+
+    public static String appendQuerystring(String url, String querystring) {
+        if(url.contains("?")) {
+            if(url.endsWith("?") || url.endsWith("&")) {
+                url = url + querystring;
+            } else {
+                url = url + "&" + querystring;
+            }
+        } else {
+            url = url + "?" + querystring;
+        }
+        return url;
+    }
+
+    public static String extractUsernamePassword(String url) throws MalformedURLException {
+        URL u = new URL(url);
+        String userInfo = u.getUserInfo();
+        if(StringUtils.isNotEmpty(userInfo)) {
+            userInfo = UrlUtil.decode(userInfo);
+        }
+        return userInfo;
+    }
+
+    public static String decode(String value) {
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

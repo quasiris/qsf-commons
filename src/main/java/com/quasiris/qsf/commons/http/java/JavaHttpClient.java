@@ -236,20 +236,40 @@ public class JavaHttpClient {
     }
 
     protected static HttpRequest buildRequest(String method, String url, @Nullable Object data, String... headers) {
+        ArrayList<String> headerList = headers != null && headers.length > 0 ?
+                new ArrayList<>(Arrays.asList(headers))
+                : new ArrayList<>();
+
+        // add basic auth header
+        try {
+            String usernamePassword = UrlUtil.extractUsernamePassword(url);
+            if(StringUtils.isNotEmpty(usernamePassword)) {
+                String[] userPwParts = usernamePassword.split(":");
+                String basicAuthHeader = HttpUtil.createBasicAuthHeader(userPwParts[0], userPwParts[1]);
+                headerList.add(basicAuthHeader);
+                url = UrlUtil.removePassword(url);
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url));
-        if(headers != null && headers.length > 0) {
-            for (String header : headers) {
-                String[] kv = header.split(":");
-                if(kv.length != 2) {
-                    LOG.warn("Wrong Header: "+kv[0]);
-                    continue; // skip broken header
-                }
-                requestBuilder.setHeader(kv[0], kv[1]);
+        boolean hasContentTypeHeader = false;
+        for (String header : headerList) {
+            String[] kv = header.split(":");
+            if(kv.length != 2) {
+                LOG.warn("Wrong Header: "+kv[0]);
+                continue; // skip broken header
             }
+            String key = kv[0];
+            String value = kv[1];
+            if(StringUtils.equalsIgnoreCase(key, "Content-Type")) {
+                hasContentTypeHeader = true;
+            }
+            requestBuilder.setHeader(key, value);
         }
         if (data != null) {
-            boolean hasContentTypeHeader = false; // TODO read from headers
             if(!hasContentTypeHeader) {
                 requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
             }

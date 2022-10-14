@@ -1,11 +1,15 @@
 package com.quasiris.qsf.commons.ai;
 
+import com.quasiris.qsf.commons.ai.download.AwsDownloadConfig;
+import com.quasiris.qsf.commons.ai.download.DownloadConfig;
+import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
+import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
+import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsValue;
 import com.quasiris.qsf.commons.util.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -14,6 +18,7 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -38,6 +44,7 @@ public class ModelRepositoryManager {
     private String uploadBaseUrl;
     private String modelBasePath;
 
+    private DownloadConfig downloadConfig;
 
     protected String getModelName() {
         return artifactId + "-" + version;
@@ -218,6 +225,21 @@ public class ModelRepositoryManager {
 
             CloseableHttpClient httpclient = HttpClients.createDefault();
             HttpGet httpGet = new HttpGet(modelUrl);
+
+            if (downloadConfig != null) {
+                if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
+                    AwsDownloadConfig aws = downloadConfig.getAws();
+                    AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
+                    Map<String, String> headers = AwsRequestSigner.signRequest(httpGet.getUri(),
+                            httpGet.getMethod(),
+                            credentials,
+                            aws.getService(),
+                            aws.getRegion());
+                    for (Map.Entry<String, String> entry : headers.entrySet()) {
+                        httpGet.addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
+                    }
+                }
+            }
 
             CloseableHttpResponse response = httpclient.execute(httpGet);
             if (response.getCode() < 300) {
@@ -428,5 +450,12 @@ public class ModelRepositoryManager {
      */
     public void setUploadBaseUrl(String uploadBaseUrl) {
         this.uploadBaseUrl = IOUtils.ensureEndingSlash(uploadBaseUrl);
+    }
+
+    public DownloadConfig getDownloadConfig() {
+        return downloadConfig;
+    }
+    public void setDownloadConfig(DownloadConfig downloadConfig) {
+        this.downloadConfig = downloadConfig;
     }
 }

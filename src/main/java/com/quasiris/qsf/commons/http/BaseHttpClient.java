@@ -15,8 +15,11 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -24,9 +27,11 @@ import java.nio.charset.StandardCharsets;
 
 import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
 
-
+// TODO deprecate this and use JavaHttpClient
 public class BaseHttpClient implements HttpClient {
     public static final String UTF_8 = "UTF-8";
+
+    private static Logger LOG = LoggerFactory.getLogger(BaseHttpClient.class); // TODO remove this
 
     private HttpErrorHandler errorHandler = new DefaultHttpErrorHandler();
 
@@ -166,11 +171,20 @@ public class BaseHttpClient implements HttpClient {
                 if(response != null) {
                     statusCode = response.getCode();
                     boolean parseResponse = parseResponseOnError || statusCode >= 200 && statusCode < 400;
-                    if(response.getEntity() != null && response.getEntity().getContent() != null && parseResponse) {
-                        if(typeReference == null) {
-                            result = (T) JsonUtil.defaultMapper().readValue(response.getEntity().getContent(), Object.class);
+                    if(response.getEntity() != null && response.getEntity().getContent() != null) {
+                        if(parseResponse) {
+                            if (typeReference == null) {
+                                result = (T) JsonUtil.defaultMapper().readValue(response.getEntity().getContent(), Object.class);
+                            } else {
+                                result = JsonUtil.defaultMapper().readValue(response.getEntity().getContent(), typeReference);
+                            }
                         } else {
-                            result = JsonUtil.defaultMapper().readValue(response.getEntity().getContent(), typeReference);
+                            try {
+                                String body = EntityUtils.toString(response.getEntity());
+                                LOG.error("Response status "+response.getCode()+" body: "+body);
+                            } catch (ParseException e) {
+                                LOG.error("Failed to parse response with status "+response.getCode()+" and body: "+e);
+                            }
                         }
                     }
                 }

@@ -39,6 +39,13 @@ public class HumanDateParserTest {
         assertEquals("2021-02-03T00:00:00Z", parser.getStart().toString());
         assertEquals("2021-02-11T00:00:00Z", parser.getEnd().toString());
     }
+    @Test
+    public void letzten11Tage() {
+        HumanDateParser parser = new HumanDateParser("letzten 11 Tage");
+        parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
+        assertEquals("2021-01-30T00:00:00Z", parser.getStart().toString());
+        assertEquals("2021-02-11T00:00:00Z", parser.getEnd().toString());
+    }
 
     @Test
     public void letzten3Monate() {

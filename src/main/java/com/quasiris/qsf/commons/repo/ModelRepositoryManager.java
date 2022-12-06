@@ -1,4 +1,4 @@
-package com.quasiris.qsf.commons.ai;
+package com.quasiris.qsf.commons.repo;
 
 import com.quasiris.qsf.commons.ai.download.AwsDownloadConfig;
 import com.quasiris.qsf.commons.ai.download.DownloadConfig;

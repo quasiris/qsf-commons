@@ -1,4 +1,4 @@
-package com.quasiris.qsf.commons.ai;
+package com.quasiris.qsf.commons.repo;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

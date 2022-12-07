@@ -1,8 +1,10 @@
-package com.quasiris.qsf.commons.ai.download;
+package com.quasiris.qsf.commons.repo.config;
 
 import com.quasiris.qsf.commons.aws.http.dto.AwsCredentials;
 
 public class AwsDownloadConfig {
+
+    private String baseUrl;
     private String service;
     private String region;
 
@@ -30,5 +32,13 @@ public class AwsDownloadConfig {
 
     public void setCredentials(AwsCredentials credentials) {
         this.credentials = credentials;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 }

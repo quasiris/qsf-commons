@@ -1,10 +1,12 @@
 package com.quasiris.qsf.commons.repo;
 
-import com.quasiris.qsf.commons.ai.download.AwsDownloadConfig;
-import com.quasiris.qsf.commons.ai.download.DownloadConfig;
+import com.quasiris.qsf.commons.repo.config.AwsDownloadConfig;
+import com.quasiris.qsf.commons.repo.config.DownloadConfig;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
 import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsValue;
+import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfig;
+import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfigHolder;
 import com.quasiris.qsf.commons.util.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.HttpResponseException;
@@ -40,11 +42,8 @@ public class ModelRepositoryManager {
     private String groupId;
     private String artifactId;
     private String version;
-    private String modelBaseUrl;
-    private String uploadBaseUrl;
-    private String modelBasePath;
 
-    private DownloadConfig downloadConfig;
+    private ModelRepositoryConfig config;
 
     protected String getModelName() {
         return artifactId + "-" + version;
@@ -154,16 +153,12 @@ public class ModelRepositoryManager {
         }
     }
 
-    protected String getModelUrl() {
-        return modelBaseUrl + getUrlZipFile();
-    }
-
     protected String getAbsoluteModelPath() {
-        return modelBasePath + getUrlPath();
+        return getConfig().getModelBasePath() + getUrlPath();
     }
 
     public String getAbsoluteModelFile() {
-        return modelBasePath + getUrlPath()  + getModelName() + "/";
+        return getConfig().getModelBasePath() + getUrlPath()  + getModelName() + "/";
     }
 
     public String getAbsoluteModelFile(String fileName) {
@@ -172,7 +167,7 @@ public class ModelRepositoryManager {
 
     protected String getUploadUrl() {
 
-        StringBuilder uploadUrl = new StringBuilder(uploadBaseUrl);
+        StringBuilder uploadUrl = new StringBuilder(getConfig().getUploadBaseUrl());
         uploadUrl.append(groupId);
         uploadUrl.append("/");
         uploadUrl.append(artifactId);
@@ -215,52 +210,66 @@ public class ModelRepositoryManager {
 
     protected void download() {
 
-        String modelUrl = getModelUrl();
+        if(getConfig() == null || getConfig().getDownloadConfig() == null) {
+            throw new RuntimeException("No config found to download the data.");
+        }
+
+
         String path = getAbsoluteModelPath();
 
         IOUtils.createDirectoryIfNotExists(path);
+        String modelLocation = "undefined";
 
-        logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
         try {
 
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet(modelUrl);
+            DownloadConfig downloadConfig = getConfig().getDownloadConfig();
 
-            if (downloadConfig != null) {
-                if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
-                    AwsDownloadConfig aws = downloadConfig.getAws();
-                    AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
-                    Map<String, String> headers = AwsRequestSigner.signRequest(httpGet.getUri(),
-                            httpGet.getMethod(),
-                            credentials,
-                            aws.getService(),
-                            aws.getRegion());
-                    for (Map.Entry<String, String> entry : headers.entrySet()) {
-                        httpGet.addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
+            if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
+                String modelUrl =  downloadConfig.getAws().getBaseUrl() + getUrlZipFile();
+                modelLocation = modelUrl;
+                logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
+
+                CloseableHttpClient httpclient = HttpClients.createDefault();
+                HttpGet httpGet = new HttpGet(modelUrl);
+                AwsDownloadConfig aws = downloadConfig.getAws();
+                AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
+                Map<String, String> headers = AwsRequestSigner.signRequest(httpGet.getUri(),
+                        httpGet.getMethod(),
+                        credentials,
+                        aws.getService(),
+                        aws.getRegion());
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    httpGet.addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
+                }
+            } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
+                String modelUrl =  downloadConfig.getHttp().getBaseUrl() + getUrlZipFile();
+                modelLocation = modelUrl;
+                logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
+                CloseableHttpClient httpclient = HttpClients.createDefault();
+                HttpGet httpGet = new HttpGet(modelUrl);
+                CloseableHttpResponse response = httpclient.execute(httpGet);
+                if (response.getCode() < 300) {
+                    try (InputStream inputStream = response.getEntity().getContent()) {
+                        Files.copy(inputStream, Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
                     }
+                    httpclient.close();
+                } else {
+                    String responseBody = EntityUtils.toString(response.getEntity());
+                    int statusCode = response.getCode();
+                    httpclient.close();
+                    throw new HttpResponseException(statusCode, responseBody);
                 }
             }
 
-            CloseableHttpResponse response = httpclient.execute(httpGet);
-            if (response.getCode() < 300) {
-                try (InputStream inputStream = response.getEntity().getContent()) {
-                    Files.copy(inputStream, Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
-                }
-                httpclient.close();
-            } else {
-                String responseBody = EntityUtils.toString(response.getEntity());
-                int statusCode = response.getCode();
-                httpclient.close();
-                throw new HttpResponseException(statusCode, responseBody);
-            }
+
             logger.info("Unzipping finished!");
         } catch (Exception e) {
-            throw new RuntimeException("Something gone wrong while downloading model file from " + modelUrl, e);
+            throw new RuntimeException("Something gone wrong while downloading model file from " + modelLocation, e);
         }
     }
 
     protected String getZipFile() {
-        return modelBasePath + getUrlZipFile();
+        return getConfig().getModelBasePath() + getUrlZipFile();
     }
 
 
@@ -280,9 +289,8 @@ public class ModelRepositoryManager {
         private String groupId;
         private String artifactId;
         private String version;
-        private String modelBaseUrl;
-        private String modelBasePath;
-        private String uploadBaseUrl;
+
+        private ModelRepositoryConfig config;
 
         private Builder() {
         }
@@ -302,6 +310,15 @@ public class ModelRepositoryManager {
             return this;
         }
 
+        public Builder config(ModelRepositoryConfig config) {
+            this.config =  config;
+            return this;
+        }
+        public Builder useDefaultConfig() {
+            config =  ModelRepositoryConfigHolder.getModelRepositoryConfig();
+            return this;
+        }
+
         public Builder groupId(String groupId) {
             this.groupId = groupId;
             return this;
@@ -317,29 +334,12 @@ public class ModelRepositoryManager {
             return this;
         }
 
-        public Builder modelBaseUrl(String modelBaseUrl) {
-            this.modelBaseUrl = modelBaseUrl;
-            return this;
-        }
-
-        public Builder modelBasePath(String modelBasePath) {
-            this.modelBasePath = modelBasePath;
-            return this;
-        }
-
-        public Builder uploadBaseUrl(String uploadBaseUrl) {
-            this.uploadBaseUrl = uploadBaseUrl;
-            return this;
-        }
-
         public ModelRepositoryManager build() {
             ModelRepositoryManager modelRepositoryManager =  new ModelRepositoryManager();
             modelRepositoryManager.setGroupId(groupId);
             modelRepositoryManager.setArtifactId(artifactId);
             modelRepositoryManager.setVersion(version);
-            modelRepositoryManager.setModelBasePath(modelBasePath);
-            modelRepositoryManager.setModelBaseUrl(modelBaseUrl);
-            modelRepositoryManager.setUploadBaseUrl(uploadBaseUrl);
+            modelRepositoryManager.setConfig(config);
             return modelRepositoryManager;
         }
     }
@@ -398,64 +398,11 @@ public class ModelRepositoryManager {
         this.version = version;
     }
 
-    /**
-     * Getter for property 'modelBaseUrl'.
-     *
-     * @return Value for property 'modelBaseUrl'.
-     */
-    public String getModelBaseUrl() {
-        return modelBaseUrl;
+    public ModelRepositoryConfig getConfig() {
+        return config;
     }
 
-    /**
-     * Setter for property 'modelBaseUrl'.
-     *
-     * @param modelBaseUrl Value to set for property 'modelBaseUrl'.
-     */
-    public void setModelBaseUrl(String modelBaseUrl) {
-        this.modelBaseUrl = IOUtils.ensureEndingSlash(modelBaseUrl);
-    }
-
-    /**
-     * Getter for property 'modelBasePath'.
-     *
-     * @return Value for property 'modelBasePath'.
-     */
-    public String getModelBasePath() {
-        return modelBasePath;
-    }
-
-    /**
-     * Setter for property 'modelBasePath'.
-     *
-     * @param modelBasePath Value to set for property 'modelBasePath'.
-     */
-    public void setModelBasePath(String modelBasePath) {
-        this.modelBasePath = IOUtils.ensureEndingSlash(modelBasePath);
-    }
-
-    /**
-     * Getter for property 'uploadBaseUrl'.
-     *
-     * @return Value for property 'uploadBaseUrl'.
-     */
-    public String getUploadBaseUrl() {
-        return uploadBaseUrl;
-    }
-
-    /**
-     * Setter for property 'uploadBaseUrl'.
-     *
-     * @param uploadBaseUrl Value to set for property 'uploadBaseUrl'.
-     */
-    public void setUploadBaseUrl(String uploadBaseUrl) {
-        this.uploadBaseUrl = IOUtils.ensureEndingSlash(uploadBaseUrl);
-    }
-
-    public DownloadConfig getDownloadConfig() {
-        return downloadConfig;
-    }
-    public void setDownloadConfig(DownloadConfig downloadConfig) {
-        this.downloadConfig = downloadConfig;
+    public void setConfig(ModelRepositoryConfig config) {
+        this.config = config;
     }
 }

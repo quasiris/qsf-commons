@@ -1,14 +1,15 @@
-package com.quasiris.qsf.commons.ai.download;
+package com.quasiris.qsf.commons.repo.config;
 
 import java.io.Serializable;
 
 public class DownloadConfig implements Serializable {
 
     public static final String AWS_TYPE = "aws";
+    public static final String HTTP_TYPE = "http";
 
-    // aws
-    private String type;
+    private String type = HTTP_TYPE;
     private AwsDownloadConfig aws;
+    private HttpDownloadConfig http;
 
     public String getType() {
         return type;
@@ -24,5 +25,13 @@ public class DownloadConfig implements Serializable {
 
     public void setAws(AwsDownloadConfig aws) {
         this.aws = aws;
+    }
+
+    public HttpDownloadConfig getHttp() {
+        return http;
+    }
+
+    public void setHttp(HttpDownloadConfig http) {
+        this.http = http;
     }
 }

@@ -241,30 +241,35 @@ public class ModelRepositoryManager {
                 for (Map.Entry<String, String> entry : headers.entrySet()) {
                     httpGet.addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
                 }
+                executeGetModels(httpGet);
             } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
                 String modelUrl =  downloadConfig.getHttp().getBaseUrl() + getUrlZipFile();
                 modelLocation = modelUrl;
                 logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
-                CloseableHttpClient httpclient = HttpClients.createDefault();
                 HttpGet httpGet = new HttpGet(modelUrl);
-                CloseableHttpResponse response = httpclient.execute(httpGet);
-                if (response.getCode() < 300) {
-                    try (InputStream inputStream = response.getEntity().getContent()) {
-                        Files.copy(inputStream, Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
-                    }
-                    httpclient.close();
-                } else {
-                    String responseBody = EntityUtils.toString(response.getEntity());
-                    int statusCode = response.getCode();
-                    httpclient.close();
-                    throw new HttpResponseException(statusCode, responseBody);
-                }
+                executeGetModels(httpGet);
             }
 
 
             logger.info("Unzipping finished!");
         } catch (Exception e) {
             throw new RuntimeException("Something gone wrong while downloading model file from " + modelLocation, e);
+        }
+    }
+
+    private void executeGetModels(HttpGet httpGet) throws IOException, ParseException {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response = httpclient.execute(httpGet);
+        if (response.getCode() < 300) {
+            try (InputStream inputStream = response.getEntity().getContent()) {
+                Files.copy(inputStream, Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
+            }
+            httpclient.close();
+        } else {
+            String responseBody = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getCode();
+            httpclient.close();
+            throw new HttpResponseException(statusCode, responseBody);
         }
     }
 

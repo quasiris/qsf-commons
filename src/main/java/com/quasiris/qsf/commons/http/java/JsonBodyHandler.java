@@ -2,27 +2,26 @@ package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
+import com.quasiris.qsf.commons.http.java.exception.HttpClientParseException;
+import com.quasiris.qsf.commons.http.java.exception.HttpClientStatusException;
 import com.quasiris.qsf.commons.util.GenericUtils;
 import com.quasiris.qsf.commons.util.JsonUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 public class JsonBodyHandler<W> implements HttpResponse.BodyHandler<W> {
     private final TypeReference<W> typeReference;
-    public JsonBodyHandler(TypeReference<W> typeReference) {
+    private final HttpMetadata metadata;
+    public JsonBodyHandler(TypeReference<W> typeReference, HttpMetadata metadata) {
         this.typeReference = typeReference;
+        this.metadata = metadata;
     }
 
     private <W> W map(HttpResponse.ResponseInfo responseInfo, String body, TypeReference<W> typeReference) {
-        if(responseInfo.statusCode() >= 400) {
-            String errMsg = "Request with status code "+responseInfo.statusCode()+" not successful!";
-            if(StringUtils.isNotEmpty(body)) {
-                errMsg += " Body: "+body;
-            }
-            throw new RuntimeException(errMsg);
-        }
+        copyMetadata(responseInfo, body);
+        validateResponse(responseInfo);
 
         if(typeReference == null) {
             return null;
@@ -32,15 +31,38 @@ public class JsonBodyHandler<W> implements HttpResponse.BodyHandler<W> {
             try {
                 return JsonUtil.defaultMapper().readValue(body, typeReference);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new HttpClientParseException("Unable to parse the response", e, metadata);
             }
         }
     }
 
+    private void validateResponse(HttpResponse.ResponseInfo responseInfo) {
+        if(responseInfo.statusCode() >= 400) {
+            throw new HttpClientStatusException(metadata);
+        }
+    }
+
+    private void copyMetadata(HttpResponse.ResponseInfo responseInfo, Object body) {
+        metadata.getResponse().setBody(body);
+        metadata.getResponse().setStatusCode(responseInfo.statusCode());
+    }
+
     private <W> HttpResponse.BodySubscriber<W> asJSON(TypeReference<W> typeReference, HttpResponse.ResponseInfo responseInfo) {
+        if (GenericUtils.instanceOf(byte[].class, GenericUtils.castClass(typeReference))) {
+            return HttpResponse.BodySubscribers.mapping(
+                    HttpResponse.BodySubscribers.ofByteArray(),
+                    body-> mapBytes(responseInfo, body)
+);
+        }
         return HttpResponse.BodySubscribers.mapping(
                 HttpResponse.BodySubscribers.ofString(StandardCharsets.UTF_8),
                 body -> map(responseInfo, body, typeReference));
+    }
+
+    private <W> W mapBytes(HttpResponse.ResponseInfo responseInfo, byte[] body) {
+        copyMetadata(responseInfo, body);
+        validateResponse(responseInfo);
+        return (W) body;
     }
 
     @Override

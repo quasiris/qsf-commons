@@ -1,9 +1,12 @@
 package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
+import com.quasiris.qsf.commons.http.java.exception.*;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.commons.util.UrlUtil;
+import com.quasiris.qsf.commons.util.model.Holder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class JavaHttpClient {
-    private static Logger LOG = LoggerFactory.getLogger(JavaHttpClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JavaHttpClient.class);
 
     public enum RequestMethod { GET, POST, PUT, PATCH, DELETE }
     public enum EventHook { BEFORE_REQUEST, AFTER_REQUEST, ON_ERROR }
@@ -56,76 +59,91 @@ public class JavaHttpClient {
         this.client = client;
     }
 
-    public <T> HttpResponse<T> get(String url, @Nullable TypeReference<T> typeReference, String... headers) throws IOException {
-        HttpRequest request = buildRequest(RequestMethod.GET.name(), url, null, headers);
-        return performRequest(request, typeReference);
+    public <T> HttpResponse<T> get(String url, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        return request(RequestMethod.GET, url, null, typeReference, headers);
     }
 
-    public <T> HttpResponse<T> post(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws IOException {
-        HttpRequest request = buildRequest(RequestMethod.POST.name(), url, data, headers);
-        return performRequest(request, typeReference);
+    public <T> HttpResponse<T> post(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        return request(RequestMethod.POST, url, data, typeReference, headers);
     }
 
-    public <T> HttpResponse<T> put(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws IOException {
-        HttpRequest request = buildRequest(RequestMethod.PUT.name(), url, data, headers);
-        return performRequest(request, typeReference);
+    public <T> HttpResponse<T> put(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        return request(RequestMethod.PUT, url, data, typeReference, headers);
     }
 
-    public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws IOException {
-        HttpRequest request = buildRequest(method.name(), url, data, headers);
-        return performRequest(request, typeReference);
+    public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        HttpMetadata metadata = new HttpMetadata();
+        HttpRequest request = buildRequest(method.name(), url, data, metadata, headers);
+        return performRequest(request, typeReference, metadata);
     }
 
-    protected <T> HttpResponse<T> performRequest(HttpRequest request, @Nullable TypeReference<T> typeReference) throws IOException {
-        HttpResponse<T> httpResponse = null;
-        if(hooks.get(EventHook.BEFORE_REQUEST) != null) {
+    protected <T> HttpResponse<T> performRequest(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) throws HttpClientException {
+        Holder<HttpResponse<T>> holder = new Holder<>();
+        if (hooks.get(EventHook.BEFORE_REQUEST) != null) {
             for (HttpHook httpHook : hooks.get(EventHook.BEFORE_REQUEST)) {
-                httpResponse = httpHook.handle(request, typeReference, null, null);
+                holder.value = httpHook.handle(request, typeReference, null, null, metadata);
             }
         }
 
         int i = 0;
-        while (httpResponse == null && (i == 0 || i <= numRetries)) {
+        while (holder.value == null && (i == 0 || i <= numRetries)) {
             i++;
-            try {
-                httpResponse = send(request, typeReference);
-            } catch (IOException | InterruptedException e) {
-                boolean hasRetriesLeft = i <= numRetries;
-                if(hasRetriesLeft && shouldRetry(httpResponse)) {
-                    LOG.warn("Retry failed request with reason:", e);
-                    continue; // retry
+            tryToSend(request, typeReference, metadata, holder, i);
+        }
+
+        if (hooks.get(EventHook.AFTER_REQUEST) != null) {
+            for (HttpHook httpHook : hooks.get(EventHook.AFTER_REQUEST)) {
+                holder.value = httpHook.handle(request, typeReference, holder.value, null, metadata);
+            }
+        }
+
+        return holder.value;
+    }
+
+    private <T> void tryToSend(HttpRequest request, TypeReference<T> typeReference, HttpMetadata metadata, Holder<HttpResponse<T>> holder, int currentTry) {
+        try {
+            holder.value = send(request, typeReference, metadata);
+        }catch (Exception e){
+            if (!handleRetriesAndErrorHook(request, typeReference, metadata, holder, currentTry, e)){
+                Throwable cause = e.getCause();
+                if (cause instanceof HttpClientParseException){
+                    throw new HttpClientParseException(e, metadata);
+                }else if (cause instanceof HttpClientStatusException){
+                    throw new HttpClientStatusException(e, metadata);
                 } else {
-                    if(hooks.get(EventHook.ON_ERROR) != null) {
-                        for (HttpHook httpHook : hooks.get(EventHook.ON_ERROR)) {
-                            httpResponse = httpHook.handle(request, typeReference, httpResponse, e);
-                        }
-                    } else {
-                        throw new IOException(e);
-                    }
+                    throw new HttpClientUnexpectedException(e, metadata);
                 }
             }
         }
-
-        if(hooks.get(EventHook.AFTER_REQUEST) != null) {
-            for (HttpHook httpHook : hooks.get(EventHook.AFTER_REQUEST)) {
-                httpResponse = httpHook.handle(request, typeReference, httpResponse, null);
-            }
-        }
-
-        return httpResponse;
     }
 
-    private <T> boolean shouldRetry(HttpResponse<T> httpResponse) {
+    private <T> boolean handleRetriesAndErrorHook(HttpRequest request, TypeReference<T> typeReference, HttpMetadata metadata, Holder<HttpResponse<T>> httpResponseHolder, int currentTry, Exception e) {
+        boolean hasRetriesLeft = currentTry <= numRetries;
+        if (hasRetriesLeft && shouldRetry(metadata)) {
+            metadata.setRetries(metadata.getRetries() + 1);
+            LOG.warn("Retry failed request with reason:", e);
+            return true;
+        } else if (hooks.get(EventHook.ON_ERROR) != null) {
+            for (HttpHook httpHook : hooks.get(EventHook.ON_ERROR)) {
+                httpResponseHolder.value = httpHook.handle(request, typeReference, httpResponseHolder.value, e, metadata);
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    private boolean shouldRetry(HttpMetadata metadata) {
         boolean shouldRetry = true;
-        if(httpResponse != null) {
-            if(httpResponse.statusCode() == 404) {
+        if(metadata.getResponse().getStatusCode() != null) {
+            if(metadata.getResponse().getStatusCode() == 404) {
                 shouldRetry = false;
             }
         }
         return shouldRetry;
     }
 
-    protected <T> HttpResponse<T> send(HttpRequest request, @Nullable TypeReference<T> typeReference) throws IOException, InterruptedException {
+    protected <T> HttpResponse<T> send(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) throws IOException, InterruptedException {
         HttpResponse<T> httpResponse = null;
 
         // load from cache
@@ -134,12 +152,14 @@ public class JavaHttpClient {
             HttpResponse cachedResponse = cache.get(hash);
             if(cachedResponse != null) {
                 httpResponse = cachedResponse;
+                metadata.getResponse().setStatusCode(httpResponse.statusCode());
+                metadata.getResponse().setBody(httpResponse.body());
             }
         }
 
         // request
         if(httpResponse == null) {
-            httpResponse = client.send(request, new JsonBodyHandler<>(typeReference));
+            httpResponse = client.send(request, new JsonBodyHandler<>(typeReference, metadata));
         }
 
         if(httpResponse != null && httpResponse.statusCode() < 400) {
@@ -147,67 +167,54 @@ public class JavaHttpClient {
             if(cache != null) {
                 cache.put(hash, httpResponse);
             }
-        } else {
-            throw new IOException("Http response failed! statusCode is >= 400");
         }
 
         return httpResponse;
     }
 
     public <T> CompletableFuture<HttpResponse<T>> getAsync(String url, @Nullable TypeReference<T> typeReference, String... headers) {
-        HttpRequest request = buildRequest(RequestMethod.GET.name(), url, null, headers);
-        return performAsyncRequest(request, typeReference);
+        return requestAsync(RequestMethod.GET, url, null, typeReference, headers);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> postAsync(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) {
-        HttpRequest request = buildRequest(RequestMethod.POST.name(), url, data, headers);
-        return performAsyncRequest(request, typeReference);
+        return requestAsync(RequestMethod.POST, url, data, typeReference, headers);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> putAsync(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) {
-        HttpRequest request = buildRequest(RequestMethod.PUT.name(), url, data, headers);
-        return performAsyncRequest(request, typeReference);
+        return requestAsync(RequestMethod.PUT, url, data, typeReference, headers);
     }
 
     public <T> CompletableFuture<HttpResponse<T>> requestAsync(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) {
-        HttpRequest request = buildRequest(method.name(), url, data, headers);
-        return performAsyncRequest(request, typeReference);
+        HttpMetadata metadata = new HttpMetadata();
+        HttpRequest request = buildRequest(method.name(), url, data, metadata, headers);
+        return performAsyncRequest(request, typeReference, metadata);
     }
 
-    protected <T> CompletableFuture<HttpResponse<T>> performAsyncRequest(HttpRequest request, @Nullable TypeReference<T> typeReference) {
+    protected <T> CompletableFuture<HttpResponse<T>> performAsyncRequest(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) {
         CompletableFuture<HttpResponse<T>> future = null;
         if(hooks.get(EventHook.BEFORE_REQUEST) != null) {
             for (HttpHook httpHook : hooks.get(EventHook.BEFORE_REQUEST)) {
-                try {
-                    HttpResponse<T> httpResponse = httpHook.handle(request, typeReference, null, null);
-                    future = CompletableFuture.completedFuture(httpResponse);
-                } catch (IOException ignored) {
-                }
+                HttpResponse<T> httpResponse = httpHook.handle(request, typeReference, null, null, metadata);
+                future = CompletableFuture.completedFuture(httpResponse);
             }
         }
 
-        // TODO implement num retries
-        future = sendAsync(request, typeReference);
+        future = sendAsync(request, typeReference, metadata);
 
         future = future.thenApply(resp -> {
             if(hooks.get(EventHook.AFTER_REQUEST) != null) {
                 for (HttpHook httpHook : hooks.get(EventHook.AFTER_REQUEST)) {
-                    try {
-                        resp = httpHook.handle(request, typeReference, resp, null);
-                    } catch (IOException ignored) {
-                    }
+                    resp = httpHook.handle(request, typeReference, resp, null, metadata);
                 }
             }
 
             return resp;
         });
 
-        // TODO add EventHook.ON_ERROR
-
         return future;
     }
 
-    protected <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, @Nullable TypeReference<T> typeReference) {
+    protected <T> CompletableFuture<HttpResponse<T>> sendAsync(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) {
         CompletableFuture<HttpResponse<T>> future = null;
 
         // load from cache
@@ -215,13 +222,47 @@ public class JavaHttpClient {
         if(cache != null) {
             HttpResponse<T> cachedResponse = cache.get(hash);
             if(cachedResponse != null) {
+                metadata.getResponse().setBody(cachedResponse.body());
+                metadata.getResponse().setStatusCode(cachedResponse.statusCode());
                 future = CompletableFuture.completedFuture(cachedResponse);
             }
         }
 
         // request
-        if(future == null) {
-            future = client.sendAsync(request, new JsonBodyHandler<>(typeReference));
+        if (future == null) {
+            future = client.sendAsync(request, new JsonBodyHandler<>(typeReference, metadata));
+            for (int i = 0; i < numRetries; i++) {
+                future = future.exceptionally(throwable -> {
+                    if (throwable.getCause() instanceof HttpClientException){
+                        HttpClientException cause = (HttpClientException)throwable.getCause();
+                        if (!shouldRetry(cause.getHttpMetadata())) {
+                            return (HttpResponse<T>) CompletableFuture.failedFuture(throwable).join();
+                        }
+                    }
+                    LOG.warn("Retry failed request with reason:", throwable);
+                    metadata.setRetries(metadata.getRetries() + 1);
+                    return client.sendAsync(request, new JsonBodyHandler<>(typeReference, metadata)).join();
+                });
+            }
+            future = future.handle((httpResponse, throwable) -> {
+                if (throwable != null) {
+                    Throwable cause = throwable.getCause();
+                    if (hooks.get(EventHook.ON_ERROR) != null) {
+                        HttpResponse<T> retValue = null;
+                        for (HttpHook httpHook : hooks.get(EventHook.ON_ERROR)) {
+                            retValue = httpHook.handle(request, typeReference, retValue, cause, metadata);
+                        }
+                    }
+                    if (cause instanceof HttpClientParseException) {
+                        throw new HttpClientParseException(throwable, metadata);
+                    } else if (cause instanceof HttpClientStatusException) {
+                        throw new HttpClientStatusException(throwable, metadata);
+                    } else {
+                        throw new HttpClientUnexpectedException(throwable, metadata);
+                    }
+                }
+                return httpResponse;
+            });
         }
 
         // update cache
@@ -235,7 +276,10 @@ public class JavaHttpClient {
         return future;
     }
 
-    protected static HttpRequest buildRequest(String method, String url, @Nullable Object data, String... headers) {
+    protected static HttpRequest buildRequest(String method, String url, @Nullable Object data, HttpMetadata metadata, String... headers) {
+        metadata.getRequest().setMethod(method);
+        metadata.getRequest().setBody(data);
+        metadata.getRequest().setUri(url);
         ArrayList<String> headerList = headers != null && headers.length > 0 ?
                 new ArrayList<>(Arrays.asList(headers))
                 : new ArrayList<>();
@@ -244,20 +288,20 @@ public class JavaHttpClient {
         try {
             String usernamePassword = UrlUtil.extractUsernamePassword(url);
             if(StringUtils.isNotEmpty(usernamePassword)) {
-                String[] userPwParts = usernamePassword.split(":");
+                String[] userPwParts = usernamePassword.split(":", 2);
                 String basicAuthHeader = HttpUtil.createBasicAuthHeader(userPwParts[0], userPwParts[1]);
                 headerList.add(basicAuthHeader);
                 url = UrlUtil.removePassword(url);
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw new HttpClientMalformedUrlException(e, metadata);
         }
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url));
         boolean hasContentTypeHeader = false;
         for (String header : headerList) {
-            String[] kv = header.split(":");
+            String[] kv = header.split(":", 2);
             if(kv.length != 2) {
                 LOG.warn("Wrong Header: "+kv[0]);
                 continue; // skip broken header
@@ -274,7 +318,10 @@ public class JavaHttpClient {
                 requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
             }
             String postString = data instanceof String ? data.toString() : JsonUtil.toJson(data);
+            metadata.getRequest().setBody(postString);
             requestBuilder.method(method, HttpRequest.BodyPublishers.ofString(postString));
+        }else {
+            requestBuilder.method(method, HttpRequest.BodyPublishers.noBody());
         }
         return requestBuilder.build();
     }

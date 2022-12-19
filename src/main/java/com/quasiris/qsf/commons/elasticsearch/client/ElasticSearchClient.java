@@ -52,12 +52,8 @@ public class ElasticSearchClient {
                 throw new RuntimeException(e);
             }
         } else {
-            try {
-                java.net.http.HttpResponse<ElasticResult> httpResponse = httpClient.post(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
-                result = httpResponse.body();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            java.net.http.HttpResponse<ElasticResult> httpResponse = httpClient.post(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
+            result = httpResponse.body();
         }
         return result;
     }
@@ -99,12 +95,8 @@ public class ElasticSearchClient {
                 throw new RuntimeException(e);
             }
         } else {
-            try {
-                java.net.http.HttpResponse<MultiElasticResult> httpResponse = httpClient.post(apiUrl, jsonNd, castTypeReference(MultiElasticResult.class), "Content-Type: "+ContentType.APPLICATION_NDJSON);
-                result = httpResponse.body();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            java.net.http.HttpResponse<MultiElasticResult> httpResponse = httpClient.post(apiUrl, jsonNd, castTypeReference(MultiElasticResult.class), "Content-Type: "+ContentType.APPLICATION_NDJSON);
+            result = httpResponse.body();
         }
         return result;
     }

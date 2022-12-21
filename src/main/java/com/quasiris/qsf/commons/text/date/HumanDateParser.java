@@ -28,6 +28,7 @@ public class HumanDateParser {
         durationMap.put("zukunft", new FutureParser());
         durationMap.put("future", new FutureParser());
         durationMap.put("last day", new DurationDateParser("P1D"));
+        durationMap.put("letzter tag", new DurationDateParser("P1D"));
         durationMap.put("yesterday", new DayDateParser("P1D"));
         durationMap.put("gestern", new DayDateParser("P1D"));
         durationMap.put("today", new DayDateParser("P0D"));

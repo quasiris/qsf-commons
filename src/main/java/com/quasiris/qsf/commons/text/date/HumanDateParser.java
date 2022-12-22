@@ -35,7 +35,9 @@ public class HumanDateParser {
         durationMap.put("heute", new DayDateParser("P0D"));
         durationMap.put("last 3 days", new DurationDateParser("P3D"));
         durationMap.put("letzten 3 tage", new DurationDateParser("P3D"));
+        durationMap.put("letzte 3 tage", new DurationDateParser("P3D"));
         durationMap.put("letzten 7 tage", new DurationDateParser("P7D"));
+        durationMap.put("letzte 7 tage", new DurationDateParser("P7D"));
         durationMap.put("letzten 30 tage", new DurationDateParser("P30D"));
         durationMap.put("this week", new WeekDateParser("P0D"));
         durationMap.put("diese woche", new WeekDateParser("P0D"));

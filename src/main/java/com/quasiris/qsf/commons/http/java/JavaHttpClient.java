@@ -30,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 public class JavaHttpClient {
     private static final Logger LOG = LoggerFactory.getLogger(JavaHttpClient.class);
 
-    public enum RequestMethod { GET, POST, PUT, PATCH, DELETE }
+    public enum RequestMethod { GET, POST, PUT, PATCH, DELETE, HEAD }
     public enum EventHook { BEFORE_REQUEST, AFTER_REQUEST, ON_ERROR }
 
     HttpClient client;
@@ -69,6 +69,15 @@ public class JavaHttpClient {
 
     public <T> HttpResponse<T> put(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
         return request(RequestMethod.PUT, url, data, typeReference, headers);
+    }
+
+    public <T> HttpResponse<T> delete(String url, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        return request(RequestMethod.DELETE, url, null, typeReference, headers);
+    }
+
+    public HttpResponse<String> head(String url, String... headers) throws HttpClientException {
+        return request(RequestMethod.HEAD, url, null, new TypeReference<String>() {
+        }, headers);
     }
 
     public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {

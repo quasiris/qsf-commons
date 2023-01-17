@@ -1,9 +1,9 @@
 package com.quasiris.qsf.commons.aws.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentials;
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsLocation;
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsValue;
+import com.quasiris.qsf.dto.http.aws.AwsCredentials;
+import com.quasiris.qsf.dto.http.aws.AwsCredentialsLocation;
+import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import com.quasiris.qsf.commons.util.JsonUtil;
 
 import java.io.IOException;

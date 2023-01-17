@@ -1,6 +1,6 @@
 package com.quasiris.qsf.commons.repo.config;
 
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentials;
+import com.quasiris.qsf.dto.http.aws.AwsCredentials;
 
 public class AwsDownloadConfig {
 

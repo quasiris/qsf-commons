@@ -1,6 +1,6 @@
 package com.quasiris.qsf.commons.aws.http;
 
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsValue;
+import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;

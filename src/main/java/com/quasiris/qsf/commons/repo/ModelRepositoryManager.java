@@ -4,7 +4,7 @@ import com.quasiris.qsf.commons.repo.config.AwsDownloadConfig;
 import com.quasiris.qsf.commons.repo.config.DownloadConfig;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
-import com.quasiris.qsf.commons.aws.http.dto.AwsCredentialsValue;
+import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfig;
 import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfigHolder;
 import com.quasiris.qsf.commons.util.IOUtils;

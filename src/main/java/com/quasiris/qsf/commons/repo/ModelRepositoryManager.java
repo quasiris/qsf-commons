@@ -1,12 +1,10 @@
 package com.quasiris.qsf.commons.repo;
 
-import com.quasiris.qsf.commons.repo.config.AwsDownloadConfig;
-import com.quasiris.qsf.commons.repo.config.DownloadConfig;
+import com.quasiris.qsf.commons.repo.config.*;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
+import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
-import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfig;
-import com.quasiris.qsf.commons.repo.config.ModelRepositoryConfigHolder;
 import com.quasiris.qsf.commons.util.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.HttpResponseException;
@@ -243,10 +241,16 @@ public class ModelRepositoryManager {
                 }
                 executeGetModels(httpGet);
             } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
-                String modelUrl =  downloadConfig.getHttp().getBaseUrl() + getUrlZipFile();
+                HttpDownloadConfig httpDownloadConfig = downloadConfig.getHttp();
+                String modelUrl =  httpDownloadConfig.getBaseUrl() + getUrlZipFile();
                 modelLocation = modelUrl;
                 logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
                 HttpGet httpGet = new HttpGet(modelUrl);
+                BasicAuth basic = httpDownloadConfig.getBasic();
+                if (basic != null) {
+                    httpGet.addHeader("Authorization", HttpUtil.createBasicAuthHeaderValue(basic.getUsername(),
+                            basic.getPassword()));
+                }
                 executeGetModels(httpGet);
             }
 

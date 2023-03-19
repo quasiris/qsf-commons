@@ -163,6 +163,7 @@ public class JavaHttpClient {
                 httpResponse = cachedResponse;
                 metadata.getResponse().setStatusCode(httpResponse.statusCode());
                 metadata.getResponse().setBody(httpResponse.body());
+                metadata.getResponse().setHeaders(httpResponse.headers().map());
             }
         }
 
@@ -233,6 +234,7 @@ public class JavaHttpClient {
             if(cachedResponse != null) {
                 metadata.getResponse().setBody(cachedResponse.body());
                 metadata.getResponse().setStatusCode(cachedResponse.statusCode());
+                metadata.getResponse().setHeaders(cachedResponse.headers().map());
                 future = CompletableFuture.completedFuture(cachedResponse);
             }
         }

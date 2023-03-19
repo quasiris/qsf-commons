@@ -1,8 +1,12 @@
 package com.quasiris.qsf.commons.http.java.model;
 
+import java.util.List;
+import java.util.Map;
+
 public class ResponseInfo {
     private Integer statusCode;
     private Object body;
+    private Map<String, List<String>> headers;
 
     public ResponseInfo() {
     }
@@ -26,5 +30,13 @@ public class ResponseInfo {
 
     public void setBody(Object body) {
         this.body = body;
+    }
+
+    public Map<String, List<String>> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, List<String>> headers) {
+        this.headers = headers;
     }
 }

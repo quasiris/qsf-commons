@@ -13,6 +13,7 @@ public class Default404HttpHook implements HttpHook {
     public <T> HttpResponse<T> handle(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpResponse<T> httpResponse, Throwable e, HttpMetadata metadata) {
         if (httpResponse != null && httpResponse.statusCode() == 404) {
             metadata.getResponse().setStatusCode(404);
+            metadata.getResponse().setHeaders(httpResponse.headers().map());
             throw new HttpClientStatusException(e, metadata);
         }
         return httpResponse;

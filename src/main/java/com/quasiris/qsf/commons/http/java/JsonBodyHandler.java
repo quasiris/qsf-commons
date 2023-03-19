@@ -44,6 +44,7 @@ public class JsonBodyHandler<W> implements HttpResponse.BodyHandler<W> {
 
     private void copyMetadata(HttpResponse.ResponseInfo responseInfo, Object body) {
         metadata.getResponse().setBody(body);
+        metadata.getResponse().setHeaders(responseInfo.headers().map());
         metadata.getResponse().setStatusCode(responseInfo.statusCode());
     }
 

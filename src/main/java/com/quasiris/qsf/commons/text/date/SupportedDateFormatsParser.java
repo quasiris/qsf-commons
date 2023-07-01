@@ -89,9 +89,23 @@ public class SupportedDateFormatsParser {
             } catch (Exception ignore) {
             }
         }
-
-
         return false;
+    }
+
+    public static String requireFromInstant(Instant instant) {
+        SupportedDateFormatsParser parser = new SupportedDateFormatsParser(instant.toString());
+        if (parser.parse()) {
+            return parser.getOutputDate();
+        }
+        throw new RuntimeException("Couldn't parse instant, instant = " + instant);
+    }
+
+    public static String requireFromString(String input) {
+        SupportedDateFormatsParser parser = new SupportedDateFormatsParser(input);
+        if (parser.parse()) {
+            return parser.getOutputDate();
+        }
+        throw new RuntimeException("Couldn't parse string, string = " + input);
     }
 
     private String createElasticsearchDate(Instant instant) {

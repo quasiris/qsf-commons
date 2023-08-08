@@ -149,11 +149,15 @@ public class AwsRequestSigner {
                                                   AwsCredentialsValue credentials,
                                                   String service,
                                                   String region) throws IOException {
-        String payloadHash = DigestUtils.sha256Hex(payload);
+        String payloadHash = getPayloadHash(payload);
         return executeSignRequest(uri, method, credentials, service, region, payloadHash);
     }
 
-    private static Map<String, String> executeSignRequest(URI uri, String method, AwsCredentialsValue credentials, String service, String region, String payloadHash) {
+    public static String getPayloadHash(InputStream payload) throws IOException {
+        return DigestUtils.sha256Hex(payload);
+    }
+
+    public static Map<String, String> executeSignRequest(URI uri, String method, AwsCredentialsValue credentials, String service, String region, String payloadHash) {
         String host = uri.getHost();
         String canonicalUri = Objects.requireNonNullElse(uri.getRawPath(), "/");
         String canonicalQueryString = Objects.requireNonNullElse(uri.getRawQuery(), "");

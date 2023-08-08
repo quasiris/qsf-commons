@@ -328,9 +328,17 @@ public class JavaHttpClient {
             if(!hasContentTypeHeader) {
                 requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
             }
-            String postString = data instanceof String ? data.toString() : JsonUtil.toJson(data);
-            metadata.getRequest().setBody(postString);
-            requestBuilder.method(method, HttpRequest.BodyPublishers.ofString(postString));
+            if (data instanceof byte[]){
+                metadata.getRequest().setBody(data);
+                requestBuilder.method(method, HttpRequest.BodyPublishers.ofByteArray((byte[]) data));
+            } else if (data instanceof String){
+                metadata.getRequest().setBody(data);
+                requestBuilder.method(method, HttpRequest.BodyPublishers.ofString((String) data));
+            } else {
+                String postString = JsonUtil.toJson(data);
+                metadata.getRequest().setBody(postString);
+                requestBuilder.method(method, HttpRequest.BodyPublishers.ofString(postString));
+            }
         }else {
             requestBuilder.method(method, HttpRequest.BodyPublishers.noBody());
         }

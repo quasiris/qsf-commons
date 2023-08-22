@@ -32,22 +32,22 @@ public class ElasticSearchClient {
                 .build());
     }
 
-    public ElasticResult search(String baseUrl, String index, String jsonQuery) {
+    public ElasticResult search(String baseUrl, String index, String jsonQuery) throws ResourceNotFoundException {
         String indexUrl = baseUrl + "/" + index;
         return search(indexUrl, jsonQuery);
     }
 
-    public ElasticResult search(String indexUrl, String jsonQuery) {
+    public ElasticResult search(String indexUrl, String jsonQuery) throws ResourceNotFoundException {
         return search(indexUrl, jsonQuery, Duration.ofMillis(timeout));
     }
 
-    public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout) {
+    public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout) throws ResourceNotFoundException {
         String apiUrl = indexUrl + "/_search";
         ElasticResult result = null;
 
         if (useApacheClient) {
             int reqTimeoutMills = (int) requestTimeout.toMillis();
-            try (DefaultHttpClient restClient = new DefaultHttpClient(reqTimeoutMills, reqTimeoutMills, reqTimeoutMills)) {
+            try (DefaultHttpClient restClient = new DefaultHttpClient(reqTimeoutMills, reqTimeoutMills, reqTimeoutMills))  {
                 HttpResponse<ElasticResult> httpResponse = restClient.postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
                 if (httpResponse.is2xx()) {
                     result = httpResponse.getPayload();
@@ -71,13 +71,12 @@ public class ElasticSearchClient {
         return result;
     }
 
-
-    public MultiElasticResult multiSearch(String baseUrl, String index, List<String> jsonQueries) {
+    public MultiElasticResult multiSearch(String baseUrl, String index, List<String> jsonQueries) throws ResourceNotFoundException {
         String indexUrl = baseUrl + "/" + index;
         return multiSearch(indexUrl, jsonQueries);
     }
 
-    public MultiElasticResult multiSearch(String indexUrl, List<String> jsonQueries) {
+    public MultiElasticResult multiSearch(String indexUrl, List<String> jsonQueries) throws ResourceNotFoundException {
         String apiUrl = indexUrl + "/_msearch";
 
         // create jsonNd

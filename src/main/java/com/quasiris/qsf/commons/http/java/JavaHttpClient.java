@@ -1,8 +1,8 @@
 package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 import com.quasiris.qsf.commons.http.java.exception.*;
+import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.commons.util.UrlUtil;
@@ -20,22 +20,21 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class JavaHttpClient {
     private static final Logger LOG = LoggerFactory.getLogger(JavaHttpClient.class);
 
-    public enum RequestMethod { GET, POST, PUT, PATCH, DELETE, HEAD }
-    public enum EventHook { BEFORE_REQUEST, AFTER_REQUEST, ON_ERROR }
+    public static final Duration DEFAULT_CONNECTION_TIMEOUT = Duration.ofSeconds(4);
+
+    public enum RequestMethod {GET, POST, PUT, PATCH, DELETE, HEAD}
+
+    public enum EventHook {BEFORE_REQUEST, AFTER_REQUEST, ON_ERROR}
 
     HttpClient client;
-    Duration timeout = Duration.ofSeconds(4);
 
+    private Duration requestTimeout;
     Cache<Integer, HttpResponse> cache;
 
     Map<EventHook, List<HttpHook>> hooks = new HashMap<>();
@@ -43,16 +42,15 @@ public class JavaHttpClient {
     int numRetries; // TODO check if this exist for async https://gist.github.com/petrbouda/92647b243eac71b089eb4fb2cfa90bf2
 
     public JavaHttpClient() {
-        this.client = HttpClient.newBuilder()
-                .connectTimeout(timeout)
-                .build();
+        this(DEFAULT_CONNECTION_TIMEOUT);
     }
 
-    public JavaHttpClient(Duration timeout) {
-        this.client = HttpClient.newBuilder()
-                .connectTimeout(timeout)
-                .build();
-        this.timeout = timeout;
+    public JavaHttpClient(Duration connectionTimeout) {
+        HttpClient.Builder builder = HttpClient.newBuilder();
+        if (connectionTimeout != null) {
+            builder = builder.connectTimeout(connectionTimeout);
+        }
+        client = builder.build();
     }
 
     public JavaHttpClient(HttpClient client) {
@@ -81,8 +79,12 @@ public class JavaHttpClient {
     }
 
     public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {
+        return request(method, url, data, typeReference, null, headers);
+    }
+
+    public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, Duration requestTimeout, String... headers) throws HttpClientException {
         HttpMetadata metadata = new HttpMetadata();
-        HttpRequest request = buildRequest(method.name(), url, data, metadata, headers);
+        HttpRequest request = buildRequest(method.name(), url, data, metadata, requestTimeout, headers);
         return performRequest(request, typeReference, metadata);
     }
 
@@ -112,12 +114,12 @@ public class JavaHttpClient {
     private <T> void tryToSend(HttpRequest request, TypeReference<T> typeReference, HttpMetadata metadata, Holder<HttpResponse<T>> holder, int currentTry) {
         try {
             holder.value = send(request, typeReference, metadata);
-        }catch (Exception e){
-            if (!handleRetriesAndErrorHook(request, typeReference, metadata, holder, currentTry, e)){
+        } catch (Exception e) {
+            if (!handleRetriesAndErrorHook(request, typeReference, metadata, holder, currentTry, e)) {
                 Throwable cause = e.getCause();
-                if (cause instanceof HttpClientParseException){
+                if (cause instanceof HttpClientParseException) {
                     throw new HttpClientParseException(e, metadata);
-                }else if (cause instanceof HttpClientStatusException){
+                } else if (cause instanceof HttpClientStatusException) {
                     throw new HttpClientStatusException(e, metadata);
                 } else {
                     throw new HttpClientUnexpectedException(e, metadata);
@@ -144,8 +146,8 @@ public class JavaHttpClient {
 
     private boolean shouldRetry(HttpMetadata metadata) {
         boolean shouldRetry = true;
-        if(metadata.getResponse().getStatusCode() != null) {
-            if(metadata.getResponse().getStatusCode() == 404) {
+        if (metadata.getResponse().getStatusCode() != null) {
+            if (metadata.getResponse().getStatusCode() == 404) {
                 shouldRetry = false;
             }
         }
@@ -157,9 +159,9 @@ public class JavaHttpClient {
 
         // load from cache
         int hash = buildCacheHash(request);
-        if(cache != null) {
+        if (cache != null) {
             HttpResponse cachedResponse = cache.get(hash);
-            if(cachedResponse != null) {
+            if (cachedResponse != null) {
                 httpResponse = cachedResponse;
                 metadata.getResponse().setStatusCode(httpResponse.statusCode());
                 metadata.getResponse().setBody(httpResponse.body());
@@ -168,13 +170,13 @@ public class JavaHttpClient {
         }
 
         // request
-        if(httpResponse == null) {
+        if (httpResponse == null) {
             httpResponse = client.send(request, new JsonBodyHandler<>(typeReference, metadata));
         }
 
-        if(httpResponse != null && httpResponse.statusCode() < 400) {
+        if (httpResponse != null && httpResponse.statusCode() < 400) {
             // update cache
-            if(cache != null) {
+            if (cache != null) {
                 cache.put(hash, httpResponse);
             }
         }
@@ -196,13 +198,13 @@ public class JavaHttpClient {
 
     public <T> CompletableFuture<HttpResponse<T>> requestAsync(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) {
         HttpMetadata metadata = new HttpMetadata();
-        HttpRequest request = buildRequest(method.name(), url, data, metadata, headers);
+        HttpRequest request = buildRequest(method.name(), url, data, metadata, null, headers);
         return performAsyncRequest(request, typeReference, metadata);
     }
 
     protected <T> CompletableFuture<HttpResponse<T>> performAsyncRequest(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) {
         CompletableFuture<HttpResponse<T>> future = null;
-        if(hooks.get(EventHook.BEFORE_REQUEST) != null) {
+        if (hooks.get(EventHook.BEFORE_REQUEST) != null) {
             for (HttpHook httpHook : hooks.get(EventHook.BEFORE_REQUEST)) {
                 HttpResponse<T> httpResponse = httpHook.handle(request, typeReference, null, null, metadata);
                 future = CompletableFuture.completedFuture(httpResponse);
@@ -212,7 +214,7 @@ public class JavaHttpClient {
         future = sendAsync(request, typeReference, metadata);
 
         future = future.thenApply(resp -> {
-            if(hooks.get(EventHook.AFTER_REQUEST) != null) {
+            if (hooks.get(EventHook.AFTER_REQUEST) != null) {
                 for (HttpHook httpHook : hooks.get(EventHook.AFTER_REQUEST)) {
                     resp = httpHook.handle(request, typeReference, resp, null, metadata);
                 }
@@ -229,9 +231,9 @@ public class JavaHttpClient {
 
         // load from cache
         int hash = buildCacheHash(request);
-        if(cache != null) {
+        if (cache != null) {
             HttpResponse<T> cachedResponse = cache.get(hash);
-            if(cachedResponse != null) {
+            if (cachedResponse != null) {
                 metadata.getResponse().setBody(cachedResponse.body());
                 metadata.getResponse().setStatusCode(cachedResponse.statusCode());
                 metadata.getResponse().setHeaders(cachedResponse.headers().map());
@@ -244,8 +246,8 @@ public class JavaHttpClient {
             future = client.sendAsync(request, new JsonBodyHandler<>(typeReference, metadata));
             for (int i = 0; i < numRetries; i++) {
                 future = future.exceptionally(throwable -> {
-                    if (throwable.getCause() instanceof HttpClientException){
-                        HttpClientException cause = (HttpClientException)throwable.getCause();
+                    if (throwable.getCause() instanceof HttpClientException) {
+                        HttpClientException cause = (HttpClientException) throwable.getCause();
                         if (!shouldRetry(cause.getHttpMetadata())) {
                             return (HttpResponse<T>) CompletableFuture.failedFuture(throwable).join();
                         }
@@ -278,7 +280,7 @@ public class JavaHttpClient {
 
         // update cache
         future = future.thenApply(httpResponse -> {
-            if(cache != null && is2xx(httpResponse)) {
+            if (cache != null && is2xx(httpResponse)) {
                 cache.put(hash, httpResponse);
             }
             return httpResponse;
@@ -287,7 +289,7 @@ public class JavaHttpClient {
         return future;
     }
 
-    protected static HttpRequest buildRequest(String method, String url, @Nullable Object data, HttpMetadata metadata, String... headers) {
+    protected HttpRequest buildRequest(String method, String url, @Nullable Object data, HttpMetadata metadata, @Nullable Duration requestTimeout, String... headers) {
         metadata.getRequest().setMethod(method);
         metadata.getRequest().setBody(data);
         metadata.getRequest().setUri(url);
@@ -295,10 +297,12 @@ public class JavaHttpClient {
                 new ArrayList<>(Arrays.asList(headers))
                 : new ArrayList<>();
 
+        requestTimeout = requestTimeout != null ? requestTimeout : this.requestTimeout;
+
         // add basic auth header
         try {
             String usernamePassword = UrlUtil.extractUsernamePassword(url);
-            if(StringUtils.isNotEmpty(usernamePassword)) {
+            if (StringUtils.isNotEmpty(usernamePassword)) {
                 String[] userPwParts = usernamePassword.split(":", 2);
                 String basicAuthHeader = HttpUtil.createBasicAuthHeader(userPwParts[0], userPwParts[1]);
                 headerList.add(basicAuthHeader);
@@ -310,28 +314,31 @@ public class JavaHttpClient {
 
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url));
+        if (requestTimeout != null) {
+            requestBuilder = requestBuilder.timeout(requestTimeout);
+        }
         boolean hasContentTypeHeader = false;
         for (String header : headerList) {
             String[] kv = header.split(":", 2);
-            if(kv.length != 2) {
-                LOG.warn("Wrong Header: "+kv[0]);
+            if (kv.length != 2) {
+                LOG.warn("Wrong Header: " + kv[0]);
                 continue; // skip broken header
             }
             String key = kv[0];
             String value = kv[1];
-            if(StringUtils.equalsIgnoreCase(key, "Content-Type")) {
+            if (StringUtils.equalsIgnoreCase(key, "Content-Type")) {
                 hasContentTypeHeader = true;
             }
             requestBuilder.setHeader(key, value);
         }
         if (data != null) {
-            if(!hasContentTypeHeader) {
+            if (!hasContentTypeHeader) {
                 requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
             }
-            if (data instanceof byte[]){
+            if (data instanceof byte[]) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofByteArray((byte[]) data));
-            } else if (data instanceof String){
+            } else if (data instanceof String) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofString((String) data));
             } else {
@@ -339,7 +346,7 @@ public class JavaHttpClient {
                 metadata.getRequest().setBody(postString);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofString(postString));
             }
-        }else {
+        } else {
             requestBuilder.method(method, HttpRequest.BodyPublishers.noBody());
         }
         return requestBuilder.build();
@@ -351,14 +358,6 @@ public class JavaHttpClient {
 
     protected static Integer buildCacheHash(HttpRequest request) {
         return request.hashCode() + request.bodyPublisher().hashCode();
-    }
-
-    public Duration getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(Duration timeout) {
-        this.timeout = timeout;
     }
 
     public Map<EventHook, List<HttpHook>> getHooks() {
@@ -383,5 +382,17 @@ public class JavaHttpClient {
 
     public void setCache(Cache<Integer, HttpResponse> cache) {
         this.cache = cache;
+    }
+
+    public Optional<Duration> getRequestTimeout() {
+        return Optional.ofNullable(this.requestTimeout);
+    }
+
+    public void setRequestTimeout(Duration requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
+
+    public Optional<Duration> getConnectionTimeout() {
+        return client.connectTimeout();
     }
 }

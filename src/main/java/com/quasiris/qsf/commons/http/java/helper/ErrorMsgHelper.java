@@ -3,6 +3,9 @@ package com.quasiris.qsf.commons.http.java.helper;
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 
 public class ErrorMsgHelper {
+
+    public static final int BYTES_TO_STRING_BODY_LIMIT = 1024;
+
     public static String createErrMsg(HttpMetadata httpMetadata) {
         StringBuilder requestData = createRequestData(httpMetadata);
         StringBuilder result = new StringBuilder().append("REQUEST:\n").append(requestData);
@@ -17,11 +20,17 @@ public class ErrorMsgHelper {
     }
 
     public static StringBuilder createResponseData(HttpMetadata httpMetadata) {
+        Object respBodyMsg = httpMetadata.getResponse().getBody();
+        if (respBodyMsg instanceof byte[]) {
+            byte[] bytes = (byte[]) respBodyMsg;
+            int length = Math.min(BYTES_TO_STRING_BODY_LIMIT, bytes.length);
+            respBodyMsg = new String(bytes, 0, length);
+        }
         return new StringBuilder()
                 .append("statusCode: ").append(httpMetadata.getResponse().getStatusCode()).append("\n")
                 .append("retries: ").append(httpMetadata.getRetries()).append("\n")
                 .append("responseBody: \n-----BEGIN RESPONSE BODY-----\n")
-                .append(httpMetadata.getResponse().getBody())
+                .append(respBodyMsg)
                 .append("\n-----END RESPONSE BODY-----\n");
     }
 

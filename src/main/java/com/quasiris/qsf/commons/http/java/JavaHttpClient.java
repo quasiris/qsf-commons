@@ -11,10 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.cache.Cache;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -350,6 +352,16 @@ public class JavaHttpClient {
             if (data instanceof byte[]) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofByteArray((byte[]) data));
+            } else if (data instanceof File) {
+                metadata.getRequest().setBody(data);
+                try {
+                    requestBuilder.method(method, HttpRequest.BodyPublishers.ofFile(((File) data).toPath()));
+                } catch (FileNotFoundException e) {
+                    throw new HttpClientParseException(e, metadata);
+                }
+            }  else if (data instanceof InputStream) {
+                metadata.getRequest().setBody(data);
+                requestBuilder.method(method, HttpRequest.BodyPublishers.ofInputStream(() -> (InputStream) data));
             } else if (data instanceof String) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofString((String) data));

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.cache.Cache;
 import java.io.IOException;
@@ -26,15 +27,13 @@ import java.util.concurrent.CompletableFuture;
 public class JavaHttpClient {
     private static final Logger LOG = LoggerFactory.getLogger(JavaHttpClient.class);
 
-    public static final Duration DEFAULT_CONNECTION_TIMEOUT = Duration.ofSeconds(4);
-
     public enum RequestMethod {GET, POST, PUT, PATCH, DELETE, HEAD}
 
     public enum EventHook {BEFORE_REQUEST, AFTER_REQUEST, ON_ERROR}
 
     HttpClient client;
 
-    private Duration requestTimeout;
+    private Duration requestTimeout = Duration.ofSeconds(4);
     Cache<Integer, HttpResponse> cache;
 
     Map<EventHook, List<HttpHook>> hooks = new HashMap<>();
@@ -42,19 +41,32 @@ public class JavaHttpClient {
     int numRetries; // TODO check if this exist for async https://gist.github.com/petrbouda/92647b243eac71b089eb4fb2cfa90bf2
 
     public JavaHttpClient() {
-        this(DEFAULT_CONNECTION_TIMEOUT);
+        // Connection timeout is forever, request timeout is default
+        this.client = HttpClient.newBuilder().build();
     }
 
-    public JavaHttpClient(Duration connectionTimeout) {
+    public JavaHttpClient(Duration requestTimeout) {
+        // Connection timeout is forever, request timeout is defined
+        this.client = HttpClient.newBuilder().build();
+        this.requestTimeout = requestTimeout;
+    }
+
+    public JavaHttpClient(Duration connectionTimeout, Duration requestTimeout) {
         HttpClient.Builder builder = HttpClient.newBuilder();
         if (connectionTimeout != null) {
             builder = builder.connectTimeout(connectionTimeout);
         }
-        client = builder.build();
+        this.client = builder.build();
+        this.requestTimeout = requestTimeout;
     }
 
     public JavaHttpClient(HttpClient client) {
         this.client = client;
+    }
+
+    public JavaHttpClient(HttpClient client, Duration requestTimeout) {
+        this.client = client;
+        this.requestTimeout = requestTimeout;
     }
 
     public <T> HttpResponse<T> get(String url, @Nullable TypeReference<T> typeReference, String... headers) throws HttpClientException {

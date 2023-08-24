@@ -9,8 +9,9 @@ import com.quasiris.qsf.pipeline.filter.elastic.bean.ElasticResult;
 import com.quasiris.qsf.pipeline.filter.elastic.bean.MultiElasticResult;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.core5.http.ContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 
@@ -23,29 +24,30 @@ import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
  */
 public class ElasticSearchClient {
     JavaHttpClient httpClient;
+    private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchClient.class);
 
     boolean useApacheClient = true;
     private long timeout = 4000L;
 
     public ElasticSearchClient() {
-        httpClient = new JavaHttpClient(HttpClient.newBuilder()
-                .build());
+        httpClient = new JavaHttpClient();
     }
 
-    public ElasticResult search(String baseUrl, String index, String jsonQuery) throws ResourceNotFoundException {
+    public ElasticResult search(String baseUrl, String index, String jsonQuery) {
         String indexUrl = baseUrl + "/" + index;
         return search(indexUrl, jsonQuery);
     }
 
-    public ElasticResult search(String indexUrl, String jsonQuery) throws ResourceNotFoundException {
+    public ElasticResult search(String indexUrl, String jsonQuery) {
         return search(indexUrl, jsonQuery, Duration.ofMillis(timeout));
     }
 
-    public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout) throws ResourceNotFoundException {
+    public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout) {
         String apiUrl = indexUrl + "/_search";
         ElasticResult result = null;
 
         if (useApacheClient) {
+            LOG.warn("Deprecated apache client is used");
             int reqTimeoutMills = (int) requestTimeout.toMillis();
             try (DefaultHttpClient restClient = new DefaultHttpClient(reqTimeoutMills, reqTimeoutMills, reqTimeoutMills))  {
                 HttpResponse<ElasticResult> httpResponse = restClient.postForResponse(apiUrl, jsonQuery, castTypeReference(ElasticResult.class));
@@ -71,12 +73,12 @@ public class ElasticSearchClient {
         return result;
     }
 
-    public MultiElasticResult multiSearch(String baseUrl, String index, List<String> jsonQueries) throws ResourceNotFoundException {
+    public MultiElasticResult multiSearch(String baseUrl, String index, List<String> jsonQueries) {
         String indexUrl = baseUrl + "/" + index;
         return multiSearch(indexUrl, jsonQueries);
     }
 
-    public MultiElasticResult multiSearch(String indexUrl, List<String> jsonQueries) throws ResourceNotFoundException {
+    public MultiElasticResult multiSearch(String indexUrl, List<String> jsonQueries) {
         String apiUrl = indexUrl + "/_msearch";
 
         // create jsonNd

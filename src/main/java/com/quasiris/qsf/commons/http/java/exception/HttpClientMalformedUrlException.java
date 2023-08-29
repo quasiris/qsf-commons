@@ -2,7 +2,7 @@ package com.quasiris.qsf.commons.http.java.exception;
 
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 
-public class HttpClientMalformedUrlException extends HttpClientException{
+public class HttpClientMalformedUrlException extends HttpClientValidationException{
 
     public HttpClientMalformedUrlException(HttpMetadata httpMetadata) {
         super(httpMetadata);

@@ -2,6 +2,7 @@ package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.http.java.exception.*;
+import com.quasiris.qsf.commons.http.java.helper.HttpClientValidationHelper;
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
@@ -99,6 +100,7 @@ public class JavaHttpClient {
     public <T> HttpResponse<T> request(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, Duration requestTimeout, String... headers) throws HttpClientException {
         HttpMetadata metadata = new HttpMetadata();
         HttpRequest request = buildRequest(method.name(), url, data, metadata, requestTimeout, headers);
+        HttpClientValidationHelper.validate(metadata, numRetries);
         return performRequest(request, typeReference, metadata);
     }
 
@@ -213,6 +215,7 @@ public class JavaHttpClient {
     public <T> CompletableFuture<HttpResponse<T>> requestAsync(RequestMethod method, String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, String... headers) {
         HttpMetadata metadata = new HttpMetadata();
         HttpRequest request = buildRequest(method.name(), url, data, metadata, null, headers);
+        HttpClientValidationHelper.validate(metadata, numRetries);
         return performAsyncRequest(request, typeReference, metadata);
     }
 
@@ -359,7 +362,7 @@ public class JavaHttpClient {
                 } catch (FileNotFoundException e) {
                     throw new HttpClientParseException(e, metadata);
                 }
-            }  else if (data instanceof InputStream) {
+            } else if (data instanceof InputStream) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofInputStream(() -> (InputStream) data));
             } else if (data instanceof String) {

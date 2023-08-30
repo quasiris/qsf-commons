@@ -61,6 +61,8 @@ public class SupportedDateFormatsParser {
     private final String inputDate;
     private String outputDate;
 
+    private Instant instant;
+
     public SupportedDateFormatsParser(String inputDate) {
         this.inputDate = inputDate;
     }
@@ -69,7 +71,7 @@ public class SupportedDateFormatsParser {
         List<Format> formats = supportedFormats.get(inputDate.length());
         if (formats == null) {
             try {
-                Instant instant = defaultFormatter.parse(inputDate, Instant::from);
+                instant = defaultFormatter.parse(inputDate, Instant::from);
                 outputDate = createElasticsearchDate(instant);
                 return true;
             } catch (Exception ex) {
@@ -79,7 +81,7 @@ public class SupportedDateFormatsParser {
 
         for (Format format : formats) {
             try {
-                Instant instant = format.formatter.parse(inputDate, Instant::from);
+                instant = format.formatter.parse(inputDate, Instant::from);
                 if (format.replaceable) {
                     outputDate = createElasticsearchDate(instant);
                 } else {
@@ -108,11 +110,23 @@ public class SupportedDateFormatsParser {
         throw new RuntimeException("Couldn't parse string, string = " + input);
     }
 
+    public static Instant requireInstantFromString(String input) {
+        SupportedDateFormatsParser parser = new SupportedDateFormatsParser(input);
+        if (parser.parse()) {
+            return parser.getInstant();
+        }
+        throw new RuntimeException("Couldn't parse string, string = " + input);
+    }
+
     private String createElasticsearchDate(Instant instant) {
         return elasticsearchFormatter.format(instant);
     }
 
     public String getOutputDate() {
         return outputDate;
+    }
+
+    public Instant getInstant() {
+        return instant;
     }
 }

@@ -10,6 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class SupportedDateFormatsParserTest {
 
     @Test
+    void testRequireInstantFromInstant() {
+        Instant now = Instant.now();
+        Instant fromInstant = SupportedDateFormatsParser.requireInstantFromString(now.toString());
+        Assertions.assertEquals(now, fromInstant);
+    }
+
+    @Test
     void testRequireFromInstantEqualsRequireFromString() {
         Instant now = Instant.now();
 

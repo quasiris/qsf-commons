@@ -39,6 +39,9 @@ public class PeriodDateParser implements DateParser {
         } else if(truncateTo.equals(ChronoUnit.MONTHS)) {
             start = referernceZonedDateTime.with(TemporalAdjusters.firstDayOfMonth())
                     .truncatedTo(ChronoUnit.DAYS);
+        } else if(truncateTo.equals(ChronoUnit.YEARS)) {
+            start = referernceZonedDateTime.with(TemporalAdjusters.firstDayOfYear())
+                    .truncatedTo(ChronoUnit.DAYS);
         } else {
             start = referernceZonedDateTime.truncatedTo(truncateTo);
         }

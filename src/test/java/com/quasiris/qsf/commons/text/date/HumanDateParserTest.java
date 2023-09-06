@@ -63,6 +63,23 @@ public class HumanDateParserTest {
         assertEquals("2021-02-11T00:00:00Z", parser.getEnd().toString());
     }
 
+    @Test
+    public void letzten6Jahre() {
+        HumanDateParser parser = new HumanDateParser("letzten 6 Jahre");
+        parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
+        assertEquals("2014-12-31T23:00:00Z", parser.getStart().toString());
+        assertEquals("2021-02-11T00:00:00Z", parser.getEnd().toString());
+    }
+
+
+    @Test
+    public void letzten6JahreShort() {
+        HumanDateParser parser = new HumanDateParser("6y");
+        parser.setNow(Instant.parse("2021-02-10T10:15:30.00Z"));
+        assertEquals("2014-12-31T23:00:00Z", parser.getStart().toString());
+        assertEquals("2021-02-11T00:00:00Z", parser.getEnd().toString());
+    }
+
 
     @Test
     public void letzten6MonateMonatsanfang() {
@@ -107,6 +124,14 @@ public class HumanDateParserTest {
     @Test
     public void testLetzten5Minuten() {
         HumanDateParser parser = new HumanDateParser("letzten 5 Minuten");
+        parser.setNow(Instant.parse("2023-08-30T10:15:30.00Z"));
+        assertEquals("2023-08-30T10:10:00Z", parser.getStart().toString());
+        assertEquals("2023-08-30T10:16:00Z", parser.getEnd().toString());
+    }
+
+    @Test
+    public void testLetzten5MinutenShort() {
+        HumanDateParser parser = new HumanDateParser("5m");
         parser.setNow(Instant.parse("2023-08-30T10:15:30.00Z"));
         assertEquals("2023-08-30T10:10:00Z", parser.getStart().toString());
         assertEquals("2023-08-30T10:16:00Z", parser.getEnd().toString());

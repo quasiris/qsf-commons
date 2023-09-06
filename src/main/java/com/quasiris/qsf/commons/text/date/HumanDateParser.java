@@ -1,13 +1,9 @@
 package com.quasiris.qsf.commons.text.date;
 
 import java.time.Instant;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class HumanDateParser {
 
@@ -49,23 +45,33 @@ public class HumanDateParser {
 
     private static Map<String, String> durationTypenMap = new HashMap<>();
     static {
+        durationTypenMap.put("m", "m");
         durationTypenMap.put("minuten", "m");
         durationTypenMap.put("minute", "m");
         durationTypenMap.put("minutes", "m");
         durationTypenMap.put("stunden", "H");
         durationTypenMap.put("stunde", "H");
+        durationTypenMap.put("h", "H");
         durationTypenMap.put("hour", "H");
         durationTypenMap.put("hours", "H");
+        durationTypenMap.put("d", "D");
         durationTypenMap.put("tage", "D");
         durationTypenMap.put("days", "D");
+        durationTypenMap.put("mo", "M");
         durationTypenMap.put("month", "M");
         durationTypenMap.put("months", "M");
         durationTypenMap.put("monat", "M");
         durationTypenMap.put("monate", "M");
+        durationTypenMap.put("w", "W");
         durationTypenMap.put("woche", "W");
         durationTypenMap.put("wochen", "W");
         durationTypenMap.put("week", "W");
         durationTypenMap.put("weeks", "W");
+        durationTypenMap.put("y", "Y");
+        durationTypenMap.put("jahr", "Y");
+        durationTypenMap.put("jahre", "Y");
+        durationTypenMap.put("year", "Y");
+        durationTypenMap.put("years", "Y");
     }
 
     public DateParser getDateParser() {
@@ -86,35 +92,52 @@ public class HumanDateParser {
         if(humanDate.matches("^\\d{4}$")) {
             return new YearParser(humanDate);
         }
+        String number = "3";
+        String type = "M";
 
         String[] splitted = humanDate.toLowerCase().split(" ");
         if(splitted.length == 3) {
-            String number = splitted[1];
-            String type = durationTypenMap.get(splitted[2]);
-            if(type != null) {
-                if("m". equals(type)) {
-                    DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "M", ChronoUnit.MINUTES);
-                    return durationDateParser;
-                }
-                if("H". equals(type)) {
-                    DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "H", ChronoUnit.HOURS);
-                    return durationDateParser;
-                }
-                if("D". equals(type)) {
-                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "D");
-                    periodDateParser.setTruncateTo(ChronoUnit.DAYS);
-                    return periodDateParser;
-                }
-                if("M". equals(type)) {
-                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "M");
-                    periodDateParser.setTruncateTo(ChronoUnit.MONTHS);
-                    return periodDateParser;
-                }
-                if("W". equals(type)) {
-                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "W");
-                    periodDateParser.setTruncateTo(ChronoUnit.WEEKS);
-                    return periodDateParser;
-                }
+            number = splitted[1];
+            type = durationTypenMap.get(splitted[2]);
+        } else {
+            String[] parts = humanDate.split("(?<=\\d)(?=\\D)");
+            if(parts.length == 2) {
+                number = parts[0];
+                type = durationTypenMap.get(parts[1]);
+            }
+        }
+
+
+
+
+        if(type != null) {
+            if("m". equals(type)) {
+                DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "M", ChronoUnit.MINUTES);
+                return durationDateParser;
+            }
+            if("H". equals(type)) {
+                DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "H", ChronoUnit.HOURS);
+                return durationDateParser;
+            }
+            if("D". equals(type)) {
+                PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "D");
+                periodDateParser.setTruncateTo(ChronoUnit.DAYS);
+                return periodDateParser;
+            }
+            if("M". equals(type)) {
+                PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "M");
+                periodDateParser.setTruncateTo(ChronoUnit.MONTHS);
+                return periodDateParser;
+            }
+            if("W". equals(type)) {
+                PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "W");
+                periodDateParser.setTruncateTo(ChronoUnit.WEEKS);
+                return periodDateParser;
+            }
+            if("Y". equals(type)) {
+                PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "Y");
+                periodDateParser.setTruncateTo(ChronoUnit.YEARS);
+                return periodDateParser;
             }
         }
         return null;

@@ -33,19 +33,11 @@ public class DurationDateParser implements DateParser {
 
     @Override
     public Instant getStart() {
-        if(truncateTo == ChronoUnit.MONTHS) {
-            Instant start = reference.minusSeconds(duration.getSeconds());
-            ZonedDateTime zdt = ZonedDateTime.ofInstant ( start , zoneId );
-            ZonedDateTime firstOfMonth = zdt.with ( ChronoField.DAY_OF_MONTH , 1 );
-            firstOfMonth = firstOfMonth.toLocalDate().atStartOfDay ( zoneId );
-            return firstOfMonth.toInstant();
-        }
-
         return reference.minusSeconds(duration.getSeconds()).truncatedTo(truncateTo);
     }
 
     @Override
     public Instant getEnd() {
-        return reference.truncatedTo(ChronoUnit.DAYS).plus(1, ChronoUnit.DAYS);
+        return reference.truncatedTo(truncateTo).plus(1, truncateTo);
     }
 }

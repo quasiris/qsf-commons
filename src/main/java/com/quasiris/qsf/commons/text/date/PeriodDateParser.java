@@ -1,11 +1,9 @@
 package com.quasiris.qsf.commons.text.date;
 
-import java.time.Instant;
-import java.time.Period;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 
 public class PeriodDateParser implements DateParser {
 
@@ -15,10 +13,14 @@ public class PeriodDateParser implements DateParser {
 
     private Period period;
 
-    private ChronoUnit truncateTo = ChronoUnit.MONTHS;
+    private ChronoUnit truncateTo = ChronoUnit.DAYS;
 
     public PeriodDateParser(String period) {
         this.period = Period.parse(period);
+    }
+    public PeriodDateParser(String period, ChronoUnit truncateTo) {
+        this.period = Period.parse(period);
+        this.truncateTo = truncateTo;
     }
 
     @Override
@@ -30,15 +32,37 @@ public class PeriodDateParser implements DateParser {
     public Instant getStart() {
 
         ZonedDateTime referernceZonedDateTime = ZonedDateTime.ofInstant ( reference , zoneId );
-        ZonedDateTime zdt = referernceZonedDateTime.minus(period);
-        ZonedDateTime firstOfMonth = zdt.with ( ChronoField.DAY_OF_MONTH , 1 );
-        firstOfMonth = firstOfMonth.toLocalDate().atStartOfDay ( zoneId );
-        return firstOfMonth.toInstant();
+        ZonedDateTime start;
+        if(truncateTo.equals(ChronoUnit.WEEKS)) {
+            start = referernceZonedDateTime.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                    .truncatedTo(ChronoUnit.DAYS);
+        } else if(truncateTo.equals(ChronoUnit.MONTHS)) {
+            start = referernceZonedDateTime.with(TemporalAdjusters.firstDayOfMonth())
+                    .truncatedTo(ChronoUnit.DAYS);
+        } else {
+            start = referernceZonedDateTime.truncatedTo(truncateTo);
+        }
+
+        ZonedDateTime zdt = start.minus(period);
+        return zdt.toInstant();
 
     }
 
     @Override
     public Instant getEnd() {
+
+        // always truncate to the end of the current day
         return reference.truncatedTo(ChronoUnit.DAYS).plus(1, ChronoUnit.DAYS);
+    }
+
+
+
+
+    public ChronoUnit getTruncateTo() {
+        return truncateTo;
+    }
+
+    public void setTruncateTo(ChronoUnit truncateTo) {
+        this.truncateTo = truncateTo;
     }
 }

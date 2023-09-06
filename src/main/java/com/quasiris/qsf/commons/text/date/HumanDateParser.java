@@ -27,25 +27,16 @@ public class HumanDateParser {
         durationMap.put("past", new PastParser());
         durationMap.put("zukunft", new FutureParser());
         durationMap.put("future", new FutureParser());
-        durationMap.put("last day", new DurationDateParser("P1D"));
-        durationMap.put("letzter tag", new DurationDateParser("P1D"));
+        durationMap.put("last day", new PeriodDateParser("P1D"));
+        durationMap.put("letzter tag", new PeriodDateParser("P1D"));
         durationMap.put("yesterday", new DayDateParser("P1D"));
         durationMap.put("gestern", new DayDateParser("P1D"));
         durationMap.put("today", new DayDateParser("P0D"));
         durationMap.put("heute", new DayDateParser("P0D"));
-        durationMap.put("last 3 days", new DurationDateParser("P3D"));
-        durationMap.put("letzten 3 tage", new DurationDateParser("P3D"));
-        durationMap.put("letzte 3 tage", new DurationDateParser("P3D"));
-        durationMap.put("letzten 7 tage", new DurationDateParser("P7D"));
-        durationMap.put("letzte 7 tage", new DurationDateParser("P7D"));
-        durationMap.put("letzten 30 tage", new DurationDateParser("P30D"));
-        durationMap.put("this week", new WeekDateParser("P0D"));
-        durationMap.put("diese woche", new WeekDateParser("P0D"));
-        durationMap.put("last week", new WeekDateParser("P7D"));
-        durationMap.put("letzte woche", new WeekDateParser("P7D"));
-        durationMap.put("last 3 month", new PeriodDateParser("P3M"));
-        durationMap.put("letzten 3 monate", new PeriodDateParser("P3M"));
-        durationMap.put("letzten 6 monate", new PeriodDateParser("P6M"));
+        durationMap.put("this week", new PeriodDateParser("P0D", ChronoUnit.WEEKS));
+        durationMap.put("diese woche", new PeriodDateParser("P0D", ChronoUnit.WEEKS));
+        durationMap.put("last week", new PeriodDateParser("P7D", ChronoUnit.WEEKS));
+        durationMap.put("letzte woche", new PeriodDateParser("P7D", ChronoUnit.WEEKS));
         durationMap.put("this month", new MonthDateParser("P0D"));
         durationMap.put("dieser monat", new MonthDateParser("P0D"));
         durationMap.put("last month", new MonthDateParser("P30D"));
@@ -58,12 +49,23 @@ public class HumanDateParser {
 
     private static Map<String, String> durationTypenMap = new HashMap<>();
     static {
+        durationTypenMap.put("minuten", "m");
+        durationTypenMap.put("minute", "m");
+        durationTypenMap.put("minutes", "m");
+        durationTypenMap.put("stunden", "H");
+        durationTypenMap.put("stunde", "H");
+        durationTypenMap.put("hour", "H");
+        durationTypenMap.put("hours", "H");
         durationTypenMap.put("tage", "D");
         durationTypenMap.put("days", "D");
         durationTypenMap.put("month", "M");
         durationTypenMap.put("months", "M");
         durationTypenMap.put("monat", "M");
         durationTypenMap.put("monate", "M");
+        durationTypenMap.put("woche", "W");
+        durationTypenMap.put("wochen", "W");
+        durationTypenMap.put("week", "W");
+        durationTypenMap.put("weeks", "W");
     }
 
     public DateParser getDateParser() {
@@ -73,7 +75,7 @@ public class HumanDateParser {
                 dateParser = getDateParserByRegex();
             }
             if (dateParser == null) {
-                dateParser = new DurationDateParser("P1D");
+                dateParser = new PeriodDateParser("P1D");
             }
             dateParser.setReference(now);
         }
@@ -90,11 +92,28 @@ public class HumanDateParser {
             String number = splitted[1];
             String type = durationTypenMap.get(splitted[2]);
             if(type != null) {
+                if("m". equals(type)) {
+                    DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "M", ChronoUnit.MINUTES);
+                    return durationDateParser;
+                }
+                if("H". equals(type)) {
+                    DurationDateParser durationDateParser = new DurationDateParser("PT" + number + "H", ChronoUnit.HOURS);
+                    return durationDateParser;
+                }
                 if("D". equals(type)) {
-                    return new DurationDateParser("P" + number + "D");
+                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "D");
+                    periodDateParser.setTruncateTo(ChronoUnit.DAYS);
+                    return periodDateParser;
                 }
                 if("M". equals(type)) {
-                    return new PeriodDateParser("P" + number + "M");
+                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "M");
+                    periodDateParser.setTruncateTo(ChronoUnit.MONTHS);
+                    return periodDateParser;
+                }
+                if("W". equals(type)) {
+                    PeriodDateParser periodDateParser = new PeriodDateParser("P" + number + "W");
+                    periodDateParser.setTruncateTo(ChronoUnit.WEEKS);
+                    return periodDateParser;
                 }
             }
         }

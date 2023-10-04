@@ -2,10 +2,10 @@ package com.quasiris.qsf.commons.http.java;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
+import jakarta.annotation.Nullable;
 import com.quasiris.qsf.commons.http.java.exception.HttpClientStatusException;
 import com.quasiris.qsf.commons.http.java.exception.HttpClientUnexpectedException;
 
-import javax.annotation.Nullable;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 

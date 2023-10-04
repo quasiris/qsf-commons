@@ -1,9 +1,8 @@
 package com.quasiris.qsf.commons.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import jakarta.annotation.Nullable;
 import org.apache.hc.core5.http.Header;
-
-import javax.annotation.Nullable;
 
 public interface HttpClient extends AutoCloseable {
     <T> HttpResponse<T> postForResponse(String url, @Nullable Object data, @Nullable TypeReference<T> typeReference, Header... headers);

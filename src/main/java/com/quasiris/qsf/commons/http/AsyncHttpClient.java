@@ -1,6 +1,7 @@
 package com.quasiris.qsf.commons.http;
 
 import com.quasiris.qsf.commons.util.JsonUtil;
+import jakarta.annotation.Nullable;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
 import org.apache.hc.client5.http.async.methods.SimpleRequestBuilder;
@@ -18,7 +19,6 @@ import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.Future;
 
 // TODO use java 11 HttpClient

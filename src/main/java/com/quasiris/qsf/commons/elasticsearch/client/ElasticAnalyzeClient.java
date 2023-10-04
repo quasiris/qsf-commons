@@ -3,8 +3,8 @@ package com.quasiris.qsf.commons.elasticsearch.client;
 import com.quasiris.qsf.commons.http.DefaultHttpClient;
 import com.quasiris.qsf.commons.http.HttpResponse;
 import com.quasiris.qsf.pipeline.filter.elastic.bean.Analyze;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 

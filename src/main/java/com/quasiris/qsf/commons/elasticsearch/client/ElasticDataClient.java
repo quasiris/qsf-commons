@@ -8,8 +8,8 @@ import com.quasiris.qsf.dto.elasticsearch.BulkRequest;
 import com.quasiris.qsf.dto.elasticsearch.BulkResponse;
 import com.quasiris.qsf.dto.elasticsearch.IndexAction;
 import com.quasiris.qsf.dto.elasticsearch.IndexDocument;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;

@@ -1,7 +1,8 @@
 package com.quasiris.qsf.commons.elasticsearch.client;
 
 import com.quasiris.qsf.commons.http.HttpResponse;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
+
 import java.util.Map;
 import static com.quasiris.qsf.commons.util.GenericUtils.castTypeReference;
 

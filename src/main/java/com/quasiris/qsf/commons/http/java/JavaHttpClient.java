@@ -8,11 +8,11 @@ import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.commons.util.UrlUtil;
 import com.quasiris.qsf.commons.util.model.Holder;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.cache.Cache;
 import java.io.File;
 import java.io.FileNotFoundException;

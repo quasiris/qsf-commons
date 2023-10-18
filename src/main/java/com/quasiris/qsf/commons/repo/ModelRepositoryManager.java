@@ -1,14 +1,16 @@
 package com.quasiris.qsf.commons.repo;
 
-import com.quasiris.qsf.commons.repo.config.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
+import com.quasiris.qsf.commons.http.java.JavaHttpClient;
+import com.quasiris.qsf.commons.http.java.exception.HttpClientStatusException;
+import com.quasiris.qsf.commons.repo.config.*;
 import com.quasiris.qsf.commons.util.HttpUtil;
-import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import com.quasiris.qsf.commons.util.IOUtils;
+import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -18,15 +20,18 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -223,35 +228,30 @@ public class ModelRepositoryManager {
             DownloadConfig downloadConfig = getConfig().getDownloadConfig();
 
             if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
-                String modelUrl =  downloadConfig.getAws().getBaseUrl() + getUrlZipFile();
+                String modelUrl = downloadConfig.getAws().getBaseUrl() + getUrlZipFile();
                 modelLocation = modelUrl;
                 logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
 
-                CloseableHttpClient httpclient = HttpClients.createDefault();
-                HttpGet httpGet = new HttpGet(modelUrl);
                 AwsDownloadConfig aws = downloadConfig.getAws();
                 AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
-                Map<String, String> headers = AwsRequestSigner.signRequest(httpGet.getUri(),
-                        httpGet.getMethod(),
+                Map<String, String> headers = AwsRequestSigner.signRequest(new URI(modelUrl),
+                        "GET",
                         credentials,
                         aws.getService(),
                         aws.getRegion());
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    httpGet.addHeader(new BasicHeader(entry.getKey(), entry.getValue()));
-                }
-                executeGetModels(httpGet);
+                executeGetModels(modelUrl, headers);
             } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
                 HttpDownloadConfig httpDownloadConfig = downloadConfig.getHttp();
-                String modelUrl =  httpDownloadConfig.getBaseUrl() + getUrlZipFile();
+                String modelUrl = httpDownloadConfig.getBaseUrl() + getUrlZipFile();
                 modelLocation = modelUrl;
                 logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
-                HttpGet httpGet = new HttpGet(modelUrl);
+                Map<String, String> headers = new LinkedHashMap<>();
                 BasicAuth basic = httpDownloadConfig.getBasic();
                 if (basic != null) {
-                    httpGet.addHeader("Authorization", HttpUtil.createBasicAuthHeaderValue(basic.getUsername(),
-                            basic.getPassword()));
+                    headers.put("Authorization",
+                            HttpUtil.createBasicAuthHeaderValue(basic.getUsername(), basic.getPassword()));
                 }
-                executeGetModels(httpGet);
+                executeGetModels(modelUrl, headers);
             }
 
 
@@ -261,20 +261,13 @@ public class ModelRepositoryManager {
         }
     }
 
-    private void executeGetModels(HttpGet httpGet) throws IOException, ParseException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        CloseableHttpResponse response = httpclient.execute(httpGet);
-        if (response.getCode() < 300) {
-            try (InputStream inputStream = response.getEntity().getContent()) {
-                Files.copy(inputStream, Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
-            }
-            httpclient.close();
-        } else {
-            String responseBody = EntityUtils.toString(response.getEntity());
-            int statusCode = response.getCode();
-            httpclient.close();
-            throw new HttpResponseException(statusCode, responseBody);
-        }
+    private void executeGetModels(String modelUrl, Map<String, String> headers) throws IOException {
+        JavaHttpClient client = new JavaHttpClient(Duration.ofSeconds(10), null);
+        HttpResponse<InputStream> resp = client.get(modelUrl, new TypeReference<>() {
+        }, headers.entrySet().stream()
+                .map(h -> h.getKey() + ":" + h.getValue())
+                .toArray(String[]::new));
+        Files.copy(resp.body(), Paths.get(getZipFile()), StandardCopyOption.REPLACE_EXISTING);
     }
 
     protected String getZipFile() {

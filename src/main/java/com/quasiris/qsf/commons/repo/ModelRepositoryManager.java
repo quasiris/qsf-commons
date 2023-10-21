@@ -4,22 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
 import com.quasiris.qsf.commons.http.java.JavaHttpClient;
-import com.quasiris.qsf.commons.http.java.exception.HttpClientStatusException;
+import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadItem;
+import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadRequest;
 import com.quasiris.qsf.commons.repo.config.*;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.IOUtils;
 import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -182,32 +174,13 @@ public class ModelRepositoryManager {
 
     public void upload(String fileName) throws IOException {
         String url = getUploadUrl();
-
-        try {
-            CloseableHttpClient httpclient = HttpClients.createDefault();
-            HttpPost post = new HttpPost(url);
-            File file = new File(fileName);
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, fileName);
-            HttpEntity entity = builder.build();
-            post.setEntity(entity);
-            CloseableHttpResponse response = httpclient.execute(post);
-
-            if(response.getCode() >= 300) {
-                String responseBody = null;
-                try {
-                    responseBody = EntityUtils.toString(response.getEntity());
-                } catch (ParseException e) {
-                    responseBody = "COULD NOT BE PARSED!";
-                }
-                throw new RuntimeException("Could not upload file " + fileName +
-                        " to url: " + url +
-                        " http code: " + response.getCode() +
-                        " message: " +  responseBody);
-            }
-            httpclient.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try (InputStream is = new FileInputStream(fileName)) {
+            JavaHttpClient httpClient = new JavaHttpClient(Duration.ofSeconds(10), null);
+            httpClient.multipartRequest(JavaHttpClient.RequestMethod.POST,
+                    url,
+                    new MultipartUploadRequest(List.of(new MultipartUploadItem("file", is))),
+                    new TypeReference<>() {
+                    }, null);
         }
     }
 

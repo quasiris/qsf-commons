@@ -3,7 +3,9 @@ package com.quasiris.qsf.commons.http.java;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.http.java.exception.*;
 import com.quasiris.qsf.commons.http.java.helper.HttpClientValidationHelper;
+import com.quasiris.qsf.commons.http.java.helper.PublisherHelper;
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
+import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadRequest;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.commons.util.UrlUtil;
@@ -102,6 +104,10 @@ public class JavaHttpClient {
         HttpRequest request = buildRequest(method.name(), url, data, metadata, requestTimeout, headers);
         HttpClientValidationHelper.validate(metadata, numRetries);
         return performRequest(request, typeReference, metadata);
+    }
+
+    public <T> HttpResponse<T> multipartRequest(RequestMethod method, String url, MultipartUploadRequest data, @Nullable TypeReference<T> typeReference, Duration requestTimeout, String... headers) throws HttpClientException {
+        return request(method, url, data, typeReference, requestTimeout, headers);
     }
 
     protected <T> HttpResponse<T> performRequest(HttpRequest request, @Nullable TypeReference<T> typeReference, HttpMetadata metadata) throws HttpClientException {
@@ -350,7 +356,13 @@ public class JavaHttpClient {
         }
         if (data != null) {
             if (!hasContentTypeHeader) {
-                requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
+                if (data instanceof MultipartUploadRequest) {
+                    String boundaryFromData = ((MultipartUploadRequest) data).getBoundary();
+                    metadata.getRequest().setBoundary(boundaryFromData != null ? boundaryFromData : UUID.randomUUID().toString());
+                    requestBuilder.setHeader("Content-Type", "multipart/form-data; boundary=" + metadata.getRequest().getBoundary());
+                } else {
+                    requestBuilder.setHeader("Content-Type", "application/json; charset=utf-8");
+                }
             }
             if (data instanceof byte[]) {
                 metadata.getRequest().setBody(data);
@@ -368,6 +380,9 @@ public class JavaHttpClient {
             } else if (data instanceof String) {
                 metadata.getRequest().setBody(data);
                 requestBuilder.method(method, HttpRequest.BodyPublishers.ofString((String) data));
+            } else if (data instanceof MultipartUploadRequest) {
+                metadata.getRequest().setBody(data);
+                requestBuilder.method(method, PublisherHelper.getMultipartUploadPublisher((MultipartUploadRequest) data, metadata));
             } else {
                 String postString = JsonUtil.toJson(data);
                 metadata.getRequest().setBody(postString);

@@ -1,6 +1,8 @@
 package com.quasiris.qsf.commons.http.java.helper;
 
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
+import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadRequest;
+import com.quasiris.qsf.commons.util.JsonUtil;
 
 import java.io.File;
 import java.io.InputStream;
@@ -59,6 +61,8 @@ public class ErrorMsgHelper {
             return "skip";
         } else if (body instanceof File) {
             return ((File) body).getAbsolutePath();
+        } else if (body instanceof MultipartUploadRequest) {
+            return JsonUtil.toJson(body);
         } else {
             String strBody = body.toString();
             return strBody.substring(0, Math.min(STRING_BODY_LIMIT, strBody.length()));
@@ -75,6 +79,8 @@ public class ErrorMsgHelper {
             return "inputStream";
         } else if (body instanceof File) {
             return "file";
+        } else if (body instanceof MultipartUploadRequest) {
+            return "multipart";
         } else {
             return "object";
         }

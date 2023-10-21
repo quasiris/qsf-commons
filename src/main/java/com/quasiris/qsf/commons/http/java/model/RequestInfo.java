@@ -4,6 +4,7 @@ public class RequestInfo {
     private String uri;
     private String method;
     private Object body;
+    private String boundary;
 
     public RequestInfo() {
     }
@@ -36,5 +37,13 @@ public class RequestInfo {
 
     public void setBody(Object body) {
         this.body = body;
+    }
+
+    public String getBoundary() {
+        return boundary;
+    }
+
+    public void setBoundary(String boundary) {
+        this.boundary = boundary;
     }
 }

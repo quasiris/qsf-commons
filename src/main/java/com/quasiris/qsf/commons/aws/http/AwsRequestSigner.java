@@ -12,10 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 
 /*
@@ -158,6 +155,10 @@ public class AwsRequestSigner {
     }
 
     public static Map<String, String> executeSignRequest(URI uri, String method, AwsCredentialsValue credentials, String service, String region, String payloadHash) {
+        return executeSignRequest(uri, method, credentials, service, region, payloadHash, new LinkedHashMap<>());
+    }
+
+    public static TreeMap<String, String> executeSignRequest(URI uri, String method, AwsCredentialsValue credentials, String service, String region, String payloadHash, Map<String, String> additionalHeaders) {
         String host = uri.getHost();
         String canonicalUri = Objects.requireNonNullElse(uri.getRawPath(), "/");
         String canonicalQueryString = Objects.requireNonNullElse(uri.getRawQuery(), "");
@@ -165,7 +166,7 @@ public class AwsRequestSigner {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         String amzDate = now.format(amzFormatter);
         String dateStamp = now.format(dateStampFormatter);
-        Map<String, String> headersToSign = new LinkedHashMap<>();
+        Map<String, String> headersToSign = new LinkedHashMap<>(additionalHeaders);
         headersToSign.put("host", host);
         headersToSign.put("x-amz-date", amzDate);
         if (credentials.getSessionToken() != null) {
@@ -173,6 +174,7 @@ public class AwsRequestSigner {
         }
         String canonicalHeaders = headersToSign.entrySet().stream()
                 .map(e -> e.getKey() + ":" + e.getValue())
+                .sorted()
                 .reduce((f, s) -> f + "\n" + s).orElse("") + "\n";
         String signedHeaders = headersToSign.keySet().stream().reduce((f, s) -> f + ";" + s).orElse("");
         String canonicalRequest = method + "\n" + canonicalUri + "\n" + canonicalQueryString + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
@@ -189,6 +191,7 @@ public class AwsRequestSigner {
             if (credentials.getSessionToken() != null) {
                 put("x-amz-security-token", credentials.getSessionToken());
             }
+            putAll(additionalHeaders);
         }};
     }
 

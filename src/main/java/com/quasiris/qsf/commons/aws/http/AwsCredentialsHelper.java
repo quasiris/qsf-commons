@@ -1,10 +1,10 @@
 package com.quasiris.qsf.commons.aws.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.dto.http.aws.AwsCredentials;
 import com.quasiris.qsf.dto.http.aws.AwsCredentialsLocation;
 import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
-import com.quasiris.qsf.commons.util.JsonUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,7 +12,9 @@ import java.util.Map;
 
 public class AwsCredentialsHelper {
     public static AwsCredentialsValue getCredentials(AwsCredentials credentials) {
-        if (credentials.getLocation() != null) {
+        if (credentials.getLocation() != null &&
+            (!Boolean.TRUE.equals(credentials.getPrioritizeValue()))
+        ) {
             return getCredentials(credentials.getLocation());
         }
         return new AwsCredentialsValue(credentials.getValue());

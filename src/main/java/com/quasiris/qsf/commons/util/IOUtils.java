@@ -133,6 +133,9 @@ public class IOUtils {
 
     public static String getStringFromClassPath(String location) throws IOException {
         InputStream is = IOUtils.class.getResourceAsStream(location);
+        if(is == null) {
+            throw new IOException("File not found in  classpath: " + location);
+        }
         return inputStreamToString(is);
     }
 

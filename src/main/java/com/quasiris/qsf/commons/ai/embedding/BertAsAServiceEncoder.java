@@ -7,6 +7,7 @@ import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
 import com.quasiris.qsf.commons.exception.NormalizerNotSupportedException;
 import com.quasiris.qsf.commons.nlp.SentenceSplitter;
 import com.quasiris.qsf.commons.text.TextSplitter;
+import com.quasiris.qsf.commons.text.normalizer.TextNormalizer;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import org.apache.commons.lang3.NotImplementedException;
@@ -45,7 +46,7 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
-    public List<TextVector> embed(String text, TextNormalizerService normalizer, boolean autosplit) {
+    public List<TextVector> embed(String text, TextNormalizer normalizer, boolean autosplit) {
         List<TextVector> textVectors = new ArrayList<>();
         List<TextVectorDocument> textVectorDocuments = embedTextBulk(Arrays.asList(text), normalizer, autosplit);
         if(textVectorDocuments.size() == 1) {
@@ -55,7 +56,7 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
         return textVectors;
     }
 
-    private List<TextVectorDocument> embedTextBulk(List<String> textList, TextNormalizerService normalizer, boolean autosplit) {
+    private List<TextVectorDocument> embedTextBulk(List<String> textList, TextNormalizer normalizer, boolean autosplit) {
         TextSplitter textSplitter = new SentenceSplitter();
         List<String> allSentences = new ArrayList<>();
         List<TextVector> allVectors = new ArrayList<>();
@@ -117,7 +118,7 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
-    public TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) {
+    public TextVectorDocument embed(Document<String> doc, TextNormalizer normalizer, boolean autosplit) {
         TextVectorDocument vectorDoc = new TextVectorDocument(doc.getId());
         List<TextVectorDocument> vectorDocs = embedBulk(Arrays.asList(doc), normalizer, autosplit);
         if(vectorDocs.size() == 1) {
@@ -127,12 +128,12 @@ public class BertAsAServiceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
-    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException {
+    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizer normalizer) throws NormalizerNotSupportedException {
         throw new NotImplementedException("This method not supported yet!");
     }
 
     @Override
-    public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) {
+    public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizer normalizer, boolean autosplit) {
         List<TextVectorDocument> vectorDocs = new ArrayList<>();
         for (Document<String> doc : docs) {
             TextVectorDocument vectorDoc = new TextVectorDocument(doc.getId());

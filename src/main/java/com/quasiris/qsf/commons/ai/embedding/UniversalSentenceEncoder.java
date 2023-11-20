@@ -8,6 +8,7 @@ import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
 import com.quasiris.qsf.commons.exception.NormalizerNotSupportedException;
 import com.quasiris.qsf.commons.nlp.SentenceSplitter;
 import com.quasiris.qsf.commons.text.TextSplitter;
+import com.quasiris.qsf.commons.text.normalizer.TextNormalizer;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 import com.quasiris.qsf.commons.util.EmbeddingUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
@@ -54,7 +55,7 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
-    public List<TextVector> embed(String text, TextNormalizerService normalizer, boolean autosplit) {
+    public List<TextVector> embed(String text, TextNormalizer normalizer, boolean autosplit) {
         TextSplitter textSplitter = new SentenceSplitter();
         List<String> sentences = autosplit ? textSplitter.split(text) : Arrays.asList(text);
 
@@ -104,17 +105,17 @@ public class UniversalSentenceEncoder implements TextEmbeddingEncoder {
     }
 
     @Override
-    public TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException {
+    public TextVectorDocument embed(Document<String> doc, TextNormalizer normalizer, boolean autosplit) throws NormalizerNotSupportedException {
         throw new NotImplementedException("This method supported yet!");
     }
 
     @Override
-    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException {
+    public TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizer normalizer) throws NormalizerNotSupportedException {
         throw new NotImplementedException("This method not supported yet!");
     }
 
     @Override
-    public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException {
+    public List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizer normalizer, boolean autosplit) throws NormalizerNotSupportedException {
         throw new NotImplementedException("This method supported yet!");
     }
 

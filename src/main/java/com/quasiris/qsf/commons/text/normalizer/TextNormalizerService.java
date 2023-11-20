@@ -20,7 +20,7 @@ import java.util.List;
  * @deprecated  As of release 0.4, replaced by {@link com.quasiris.qsf.commons.text.transform.TextTransformer}
  */
 @Deprecated
-public class TextNormalizerService {
+public class TextNormalizerService implements TextNormalizer {
     private Analyzer analyzer;
 
     public TextNormalizerService(NormalizerConfig config) {
@@ -74,6 +74,7 @@ public class TextNormalizerService {
         }
     }
 
+    @Override
     public String normalize(String text) {
         List<String> tokens = normalizeToken(text);
         return String.join(" ", tokens);

@@ -4,6 +4,7 @@ import com.quasiris.qsf.commons.ai.dto.Document;
 import com.quasiris.qsf.commons.ai.dto.TextVector;
 import com.quasiris.qsf.commons.ai.dto.TextVectorDocument;
 import com.quasiris.qsf.commons.exception.NormalizerNotSupportedException;
+import com.quasiris.qsf.commons.text.normalizer.TextNormalizer;
 import com.quasiris.qsf.commons.text.normalizer.TextNormalizerService;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface TextEmbeddingEncoder {
      * @return list or empty list
      * @throws NormalizerNotSupportedException if not supported
      */
-    List<TextVector> embed(String text, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
+    List<TextVector> embed(String text, TextNormalizer normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 
     /**
      * Embed doc into vector
@@ -31,7 +32,7 @@ public interface TextEmbeddingEncoder {
      * @return vectorized document
      * @throws NormalizerNotSupportedException if not supported
      */
-    TextVectorDocument embed(Document<String> doc, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
+    TextVectorDocument embed(Document<String> doc, TextNormalizer normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 
     /**
      * Embed fields from single doc into vector. Autosplit is disabled here.
@@ -40,7 +41,7 @@ public interface TextEmbeddingEncoder {
      * @return vectorized documents
      * @throws NormalizerNotSupportedException if not supported
      */
-    TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizerService normalizer) throws NormalizerNotSupportedException;
+    TextVectorDocument embedDoc(Document<List<String>> doc, TextNormalizer normalizer) throws NormalizerNotSupportedException;
 
     /**
      * Embed docs into vector
@@ -50,5 +51,5 @@ public interface TextEmbeddingEncoder {
      * @return vectorized documents
      * @throws NormalizerNotSupportedException if not supported
      */
-    List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizerService normalizer, boolean autosplit) throws NormalizerNotSupportedException;
+    List<TextVectorDocument> embedBulk(List<Document<String>> docs, TextNormalizer normalizer, boolean autosplit) throws NormalizerNotSupportedException;
 }

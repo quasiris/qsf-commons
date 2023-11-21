@@ -3,7 +3,7 @@
 	<groupId>com.quasiris.qsf</groupId>
 	<artifactId>qsf-commons</artifactId>
 	<packaging>jar</packaging>
-	<version>3.1.0-SNAPSHOT</version>
+	<version>3.1.0</version>
 	<name>qsf-commons</name>
 	<url>https://www.quasiris.de/de/quasiris-search-cloud/</url>
     <description>Quasiris Search Framework commons library</description>
@@ -21,7 +21,7 @@
         <connection>scm:git:${gitlab.qsc.url}/qsf-commons.git</connection>
         <developerConnection>scm:git:${gitlab.qsc.url}/qsf-commons.git</developerConnection>
         <url>https://github.com/quasiris/qsf-commons</url>
-        <tag>HEAD</tag>
+        <tag>qsf-commons-3.1.0</tag>
   </scm>
 
     <dependencies>

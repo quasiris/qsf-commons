@@ -1,19 +1,6 @@
 package com.quasiris.qsf.commons.text.transform;
 
-import com.quasiris.qsf.commons.text.transform.filter.FunctionTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.GermanUmlautTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.JsonQuoteAsStringTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.LowerCaseTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.LuceneTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.RemoveCharTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.RemoveMultipleWhitespacesTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.RemoveNumberTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.StemmingTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.TrimAllTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.TrimTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.UpperCaseTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.UrlDecodeTransformerFilter;
-import com.quasiris.qsf.commons.text.transform.filter.UrlEncodeTransformerFilter;
+import com.quasiris.qsf.commons.text.transform.filter.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +24,10 @@ public class TextTransformerFactory {
         factoryMap.put("trim", new TrimTransformerFilter());
         factoryMap.put("trimAll", new TrimAllTransformerFilter());
         factoryMap.put("removeWhitespace", new RemoveCharTransformerFilter(" "));
+        factoryMap.put("removeNewLine", new RemoveCharTransformerFilter("\n"));
+        factoryMap.put("replaceNewLineByWhitespace", new ReplaceCharTransformerFilter("\n", " "));
+        factoryMap.put("removeTab", new RemoveCharTransformerFilter("\t"));
+        factoryMap.put("replaceTabByWhitespace", new ReplaceCharTransformerFilter("\t", " "));
         factoryMap.put("urlEncode", new UrlEncodeTransformerFilter());
         factoryMap.put("urlDecode", new UrlDecodeTransformerFilter());
         factoryMap.put("md5", new UrlDecodeTransformerFilter());

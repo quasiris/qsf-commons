@@ -179,7 +179,7 @@ public class ModelRepositoryManager {
             httpClient.multipartRequest(JavaHttpClient.RequestMethod.POST,
                     url,
                     new MultipartUploadRequest(List.of(new MultipartUploadItem("file", is))),
-                    new TypeReference<>() {
+                    new TypeReference<String>() {
                     }, null);
         }
     }

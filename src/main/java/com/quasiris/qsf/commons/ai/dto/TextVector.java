@@ -7,6 +7,8 @@ public class TextVector implements Serializable {
     private String normalized;
     private Double[] vector;
 
+    private Integer tokenCount;
+
     public TextVector() {
     }
 
@@ -41,5 +43,13 @@ public class TextVector implements Serializable {
 
     public void setVector(Double[] vector) {
         this.vector = vector;
+    }
+
+    public Integer getTokenCount() {
+        return tokenCount;
+    }
+
+    public void setTokenCount(Integer tokenCount) {
+        this.tokenCount = tokenCount;
     }
 }

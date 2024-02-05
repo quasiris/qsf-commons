@@ -44,7 +44,9 @@ public class UrlUtil {
 
     public static String encode(String value) {
         try {
-            return URLEncoder.encode(value, "UTF-8");
+            String encoded = URLEncoder.encode(value, "UTF-8");
+            encoded = encoded.replace("+", "%20");
+            return encoded;
         } catch (UnsupportedEncodingException e) {
             return value;
         }

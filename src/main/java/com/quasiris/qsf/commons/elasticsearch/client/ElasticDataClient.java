@@ -32,6 +32,11 @@ public class ElasticDataClient extends ElasticBaseClient {
         this.requireAlias = requireAlias;
     }
 
+    public ElasticDataClient(int numRetries, boolean requireAlias) {
+        super(new DefaultHttpClient(DEFAULT_TIMEOUT_MILLS, DEFAULT_TIMEOUT_MILLS, DEFAULT_TIMEOUT_MILLS, numRetries));
+        this.requireAlias = requireAlias;
+    }
+
     public IndexDocument patch(String baseUrl, String index, String id, Map changes) throws ResourceNotFoundException {
         IndexDocument origin = findOne(baseUrl, index, id);
         if(origin == null) {

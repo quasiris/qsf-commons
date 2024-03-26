@@ -61,6 +61,10 @@ public class AsyncHttpClient {
             @Override
             public void completed(SimpleHttpResponse simpleHttpResponse) {
                 LOG.debug("The async request finished successful with code: " + simpleHttpResponse.getCode());
+
+                if(simpleHttpResponse.getCode() >= 300) {
+                    LOG.error("The async request failed with code: " + simpleHttpResponse.getCode() + " and body: " + simpleHttpResponse.getBody().getBodyText());
+                }
                 client.close(CloseMode.GRACEFUL);
             }
 

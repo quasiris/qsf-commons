@@ -6,6 +6,7 @@ import com.quasiris.qsf.commons.http.java.helper.HttpClientValidationHelper;
 import com.quasiris.qsf.commons.http.java.helper.PublisherHelper;
 import com.quasiris.qsf.commons.http.java.model.HttpMetadata;
 import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadRequest;
+import com.quasiris.qsf.commons.util.GenericUtils;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.JsonUtil;
 import com.quasiris.qsf.commons.util.UrlUtil;
@@ -194,6 +195,11 @@ public class JavaHttpClient {
         // request
         if (httpResponse == null) {
             httpResponse = client.send(request, new JsonBodyHandler<>(typeReference, metadata));
+            if (JsonBodyHandler.isGzipEncoding(httpResponse.headers())
+                && GenericUtils.instanceOf(InputStream.class, GenericUtils.castClass(typeReference))
+            ) {
+                httpResponse = (HttpResponse<T>) new HttpResponseWrapper((HttpResponse<InputStream>) httpResponse, metadata);
+            }
         }
 
         if (httpResponse != null && httpResponse.statusCode() < 400) {

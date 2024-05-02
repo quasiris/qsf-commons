@@ -26,7 +26,7 @@ public class ErrorMsgHelper {
 
     public static StringBuilder createResponseData(HttpMetadata httpMetadata) {
         String dataType = calcDataType(httpMetadata.getResponse().getBody());
-        String contentRepresentation = calcContentRepresentation(httpMetadata.getResponse().getBody());
+        String contentRepresentation = calcContentRepresentation(httpMetadata.getResponse().getBody(), false);
         return new StringBuilder()
                 .append("statusCode: ").append(httpMetadata.getResponse().getStatusCode()).append("\n")
                 .append("retries: ").append(httpMetadata.getRetries()).append("\n")
@@ -39,7 +39,7 @@ public class ErrorMsgHelper {
     public static StringBuilder createRequestData(HttpMetadata httpMetadata) {
         Object body = httpMetadata.getRequest().getBody();
         String dataType = calcDataType(body);
-        String contentRepresentation = calcContentRepresentation(body);
+        String contentRepresentation = calcContentRepresentation(body, true);
         return new StringBuilder()
                 .append("requestUri: ").append(httpMetadata.getRequest().getUri()).append("\n")
                 .append("method: ").append(httpMetadata.getRequest().getMethod()).append("\n")
@@ -49,7 +49,7 @@ public class ErrorMsgHelper {
                 .append("\n-----END REQUEST BODY-----\n");
     }
 
-    private static String calcContentRepresentation(Object body) {
+    private static String calcContentRepresentation(Object body, boolean displayObjBody) {
         if (body == null) {
             return null;
         }
@@ -63,8 +63,20 @@ public class ErrorMsgHelper {
             return ((File) body).getAbsolutePath();
         } else if (body instanceof MultipartUploadRequest) {
             return JsonUtil.toJson(body);
-        } else {
+        } else if (body instanceof String) {
             String strBody = body.toString();
+            return strBody.substring(0, Math.min(STRING_BODY_LIMIT, strBody.length()));
+        } else {
+            String strBody;
+            if (displayObjBody) {
+                try {
+                    strBody = JsonUtil.defaultMapper().writeValueAsString(body);
+                } catch (Exception ex) {
+                    return "can-not-serialize-as-json-string";
+                }
+            } else {
+                strBody = body.toString();
+            }
             return strBody.substring(0, Math.min(STRING_BODY_LIMIT, strBody.length()));
         }
     }

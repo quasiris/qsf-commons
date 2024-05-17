@@ -14,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class UrlUtilTest {
 
     @Test
+    public void replacePath() {
+        String url = UrlUtil.replacePath("https://myUser:myPassword@elastic.quasiris.de:9200/product-search", "/my-new-path");
+        assertEquals("https://myUser:myPassword@elastic.quasiris.de:9200/my-new-path", url);
+    }
+    @Test
     public void removePassword() {
         String url = UrlUtil.removePassword("https://myUser:myPassword@elastic.quasiris.de:9200/product-search");
         assertEquals("https://elastic.quasiris.de:9200/product-search", url);

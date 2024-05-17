@@ -4,10 +4,7 @@ import com.quasiris.qsf.dto.common.MultiMap;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +15,23 @@ public class UrlUtil {
     public static String removePassword(String url) {
         return url.replaceAll("(.*)://(.*)@(.*)", "$1://$3");
     }
+
+
+    public static String replacePath(String url, String newPath) {
+        try {
+            URI originalUri = new URI(url);
+
+            if (newPath == null) {
+                newPath = "";
+            }
+
+            return url.replaceAll(originalUri.getPath(), newPath);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     public static Map<String, Object> encode(Map<String, Object> values, String suffix) {
         Map<String, Object> ret = new HashMap<>();

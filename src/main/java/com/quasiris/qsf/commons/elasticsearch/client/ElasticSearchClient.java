@@ -43,7 +43,14 @@ public class ElasticSearchClient {
     }
 
     public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout) {
+        return search(indexUrl, jsonQuery, requestTimeout, null);
+    }
+
+    public ElasticResult search(String indexUrl, String jsonQuery, Duration requestTimeout, String queryString) {
         String apiUrl = indexUrl + "/_search";
+        if(queryString != null) {
+            apiUrl = apiUrl + queryString;
+        }
         ElasticResult result = null;
 
         if (useApacheClient) {

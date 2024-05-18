@@ -7,12 +7,20 @@ import org.apache.commons.codec.digest.HmacUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /*
@@ -114,6 +122,15 @@ public class AwsRequestSigner {
     public static final DateTimeFormatter dateStampFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String algorithm = "AWS4-HMAC-SHA256";
 
+    private static final String DEFAULT_ENCODING = "UTF-8";
+    private static final Pattern ENCODED_CHARACTERS_PATTERN = Pattern.compile(Pattern.quote("+") +
+                                                                              "|" +
+                                                                              Pattern.quote("*") +
+                                                                              "|" +
+                                                                              Pattern.quote("%7E") +
+                                                                              "|" +
+                                                                              Pattern.quote("%2F"));
+
     public static Map<String, String> signS3Request(URI uri,
                                                     String method,
                                                     AwsCredentialsValue credentials,
@@ -173,9 +190,9 @@ public class AwsRequestSigner {
             headersToSign.put("x-amz-security-token", credentials.getSessionToken());
         }
         String canonicalHeaders = headersToSign.entrySet().stream()
-                .map(e -> e.getKey() + ":" + e.getValue())
-                .sorted()
-                .reduce((f, s) -> f + "\n" + s).orElse("") + "\n";
+                                          .map(e -> e.getKey() + ":" + e.getValue())
+                                          .sorted()
+                                          .reduce((f, s) -> f + "\n" + s).orElse("") + "\n";
         String signedHeaders = headersToSign.keySet().stream().reduce((f, s) -> f + ";" + s).orElse("");
         String canonicalRequest = method + "\n" + canonicalUri + "\n" + canonicalQueryString + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
         String credentialScope = dateStamp + "/" + region + "/" + service + "/" + "aws4_request";
@@ -195,6 +212,32 @@ public class AwsRequestSigner {
         }};
     }
 
+    public static String getPreSignedQueryString(URI uri, AwsCredentialsValue credentials, String service, String region, Duration duration) {
+        String canonicalUri = Objects.requireNonNullElse(uri.getRawPath(), "/");
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        String amzDate = now.format(amzFormatter);
+        String dateStamp = now.format(dateStampFormatter);
+        String credentialScope = dateStamp + "/" + region + "/" + service + "/" + "aws4_request";
+        String amzCredential = urlEncode(
+                credentials.getAccessKeyId() + "/" + credentialScope
+                , false);
+        String canonicalQueryString = "X-Amz-Algorithm=" + algorithm +
+                                      "&X-Amz-Credential=" + amzCredential +
+                                      "&X-Amz-Date=" + amzDate +
+                                      "&X-Amz-Expires=" + duration.getSeconds();
+        if (credentials.getSessionToken() != null) {
+            canonicalQueryString += "&X-Amz-Security-Token=" + urlEncode(credentials.getSessionToken(), false);
+        }
+        canonicalQueryString += "&X-Amz-SignedHeaders=host";
+        String canonicalHeaders = "host:" + uri.getHost() + "\n";
+        String signedHeaders = "host";
+        String canonicalRequest = "GET" + "\n" + canonicalUri + "\n" + canonicalQueryString + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + "UNSIGNED-PAYLOAD";
+        String stringToSign = algorithm + "\n" + amzDate + "\n" + credentialScope + "\n" + DigestUtils.sha256Hex(canonicalRequest);
+        byte[] signingKey = getSignatureKey(credentials.getSecretAccessKey(), dateStamp, region, service);
+        String signature = new HmacUtils(HMAC_ALGORITHM, signingKey).hmacHex(stringToSign);
+        return canonicalQueryString + "&X-Amz-Signature=" + signature;
+    }
+
     private static byte[] getSignatureKey(String awsSecretAccessKey, String dateStamp, String region, String service) {
         byte[] kDate = signRequest(("AWS4" + awsSecretAccessKey).getBytes(StandardCharsets.UTF_8), dateStamp);
         byte[] kRegion = signRequest(kDate, region);
@@ -204,6 +247,34 @@ public class AwsRequestSigner {
 
     private static byte[] signRequest(byte[] key, String msg) {
         return new HmacUtils(HMAC_ALGORITHM, key).hmac(msg);
+    }
+
+    public static String urlEncode(final String value, final boolean path) {
+        if (value == null) {
+            return "";
+        }
+        try {
+            String encoded = URLEncoder.encode(value, DEFAULT_ENCODING);
+            Matcher matcher = ENCODED_CHARACTERS_PATTERN.matcher(encoded);
+            StringBuilder buffer = new StringBuilder(encoded.length());
+            while (matcher.find()) {
+                String replacement = matcher.group(0);
+                if ("+".equals(replacement)) {
+                    replacement = "%20";
+                } else if ("*".equals(replacement)) {
+                    replacement = "%2A";
+                } else if ("%7E".equals(replacement)) {
+                    replacement = "~";
+                } else if (path && "%2F".equals(replacement)) {
+                    replacement = "/";
+                }
+                matcher.appendReplacement(buffer, replacement);
+            }
+            matcher.appendTail(buffer);
+            return buffer.toString();
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
 }

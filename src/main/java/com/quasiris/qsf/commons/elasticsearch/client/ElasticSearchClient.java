@@ -26,7 +26,7 @@ public class ElasticSearchClient {
     JavaHttpClient httpClient;
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchClient.class);
 
-    boolean useApacheClient = true;
+    boolean useApacheClient = false;
     private long timeout = 4000L;
 
     public ElasticSearchClient() {

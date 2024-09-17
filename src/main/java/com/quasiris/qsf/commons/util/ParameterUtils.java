@@ -1,5 +1,8 @@
 package com.quasiris.qsf.commons.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import java.util.List;
 import java.util.Map;
 
 public class ParameterUtils {
@@ -14,6 +17,19 @@ public class ParameterUtils {
         }
 
         return JsonUtil.defaultMapper().convertValue(value, toValueType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getParameter(Map<String, Object> parameters, String key, T defaultValue, TypeReference<T> typeReference) {
+        Object value = parameters.get(key);
+        if (value != null) {
+            if (typeReference.getType() instanceof Class && ((Class<?>) typeReference.getType()).isInstance(value)) {
+                return (T) value;
+            } else if (value instanceof List<?> && typeReference.getType().getTypeName().contains("List")) {
+                return (T) value;
+            }
+        }
+        return defaultValue;
     }
 
     @SuppressWarnings("unchecked")

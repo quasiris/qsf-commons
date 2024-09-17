@@ -1,8 +1,11 @@
 package com.quasiris.qsf.commons.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -196,6 +199,99 @@ public class ParameterUtilsTest {
         // Assert
         assertEquals("John", result.getName());
         assertEquals(30, result.getAge()); // Should convert map to Person object
+    }
+
+
+    @Test
+    public void testGetParameterTypeReference_existingParameterWithCorrectType() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("age", 25);
+
+        // Act
+        Integer result = ParameterUtils.getParameter(params, "age", 0, new TypeReference<Integer>() {});
+
+        // Assert
+        assertEquals(25, result);
+    }
+
+    @Test
+    public void testGetParameterTypeReference_existingParameterWithIncorrectType() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("age", "25"); // Value is a string, not an integer
+
+        // Act
+        Integer result = ParameterUtils.getParameter(params, "age", 0, new TypeReference<Integer>() {});
+
+        // Assert
+        assertEquals(0, result); // Should return default value since types don't match
+    }
+
+    @Test
+    public void testGetParameterTypeReference_existingParameterWithListType() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("names", Arrays.asList("Alice", "Bob"));
+
+        // Act
+        List<String> result = ParameterUtils.getParameter(params, "names", Arrays.asList("Default"), new TypeReference<List<String>>() {});
+
+        // Assert
+        assertEquals(Arrays.asList("Alice", "Bob"), result); // Should return the list of names
+    }
+
+    @Test
+    public void testGetParameterTypeReference_existingParameterWithMismatchedListType() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("names", Arrays.asList(1, 2, 3)); // Value is a list of integers
+
+        // Act
+        List<String> result = ParameterUtils.getParameter(params, "names", Arrays.asList("Default"), new TypeReference<List<String>>() {});
+
+        // Assert
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
+
+    @Test
+    public void testGetParameterTypeReference_nonExistingParameter() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+
+        // Act
+        String result = ParameterUtils.getParameter(params, "nonExistingKey", "DefaultValue", new TypeReference<String>() {});
+
+        // Assert
+        assertEquals("DefaultValue", result); // Should return the default value
+    }
+
+    @Test
+    public void testGetParameterTypeReference_nullValueInMap() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", null);
+
+        // Act
+        String result = ParameterUtils.getParameter(params, "name", "DefaultValue", new TypeReference<String>() {});
+
+        // Assert
+        assertEquals("DefaultValue", result); // Should return the default value since the parameter is null
+    }
+
+    @Test
+    public void testGetParameterTypeReference_withComplexObject() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        Person person = new Person("John", 30);
+        params.put("person", person);
+
+        // Act
+        Person result = ParameterUtils.getParameter(params, "person", new Person("Default", 0), new TypeReference<Person>() {});
+
+        // Assert
+        assertEquals("John", result.getName());
+        assertEquals(30, result.getAge()); // Should return the Person object
     }
 
     public static class Person {

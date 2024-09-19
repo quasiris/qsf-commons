@@ -26,7 +26,7 @@ public class ParameterUtils {
 
 
     public static String getParameter(Map<String, Object> parameters, String key) {
-        return getParameter(parameters, key, (String) null);
+        return getParameter(parameters, key, null, String.class);
     }
 
     @SuppressWarnings("unchecked")

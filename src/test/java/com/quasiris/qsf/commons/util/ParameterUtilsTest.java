@@ -13,6 +13,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ParameterUtilsTest {
 
     @Test
+    public void testGetParameter_string() {
+        // Setup
+        Map<String, Object> params = new HashMap<>();
+        params.put("age", "25");
+
+        // Act
+        String result = ParameterUtils.getParameter(params, "age");
+
+        // Assert
+        assertEquals("25", result);
+    }
+    @Test
     public void testGetParameter_existingParameterWithCorrectType() {
         // Setup
         Map<String, Object> params = new HashMap<>();

@@ -19,6 +19,16 @@ public class ParameterUtils {
         return JsonUtil.defaultMapper().convertValue(value, toValueType);
     }
 
+    public static <T> T getParameter(Map<String, Object> parameters, String param, Class<T> toValueType) {
+        return getParameter(parameters, param, null, toValueType);
+    }
+
+
+
+    public static String getParameter(Map<String, Object> parameters, String key) {
+        return getParameter(parameters, key, (String) null);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getParameter(Map<String, Object> parameters, String key, T defaultValue, TypeReference<T> typeReference) {
         Object value = parameters.get(key);

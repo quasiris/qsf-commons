@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.quasiris.qsf</groupId>
-	<artifactId>qsf-commons</artifactId>
-	<packaging>jar</packaging>
-	<version>7.3.0-SNAPSHOT</version>
-	<name>qsf-commons</name>
-	<url>https://www.quasiris.de/de/quasiris-search-cloud/</url>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.quasiris.qsf</groupId>
+    <artifactId>qsf-commons</artifactId>
+    <packaging>jar</packaging>
+    <version>7.3.0-SNAPSHOT</version>
+    <name>qsf-commons</name>
+    <url>https://www.quasiris.de/de/quasiris-search-cloud/</url>
     <description>Quasiris Search Framework commons library</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.quasiris.qsf</groupId>
             <artifactId>qsf-dto</artifactId>
-            <version>7.1.0</version>
+            <version>7.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -79,12 +79,12 @@
             <version>5.2.0</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
-			<version>2.2</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -291,3 +291,4 @@
     </profiles>
 
 </project>
+

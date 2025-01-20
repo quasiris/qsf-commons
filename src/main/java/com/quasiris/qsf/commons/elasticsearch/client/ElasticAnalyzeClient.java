@@ -52,7 +52,6 @@ public class ElasticAnalyzeClient {
             params.put("explain", explain);
         }
 
-
         HttpResponse<Map> httpResponse;
         try (DefaultHttpClient restClient = new DefaultHttpClient()) {
             httpResponse = restClient.postForResponse(apiUrl, params, castTypeReference(Map.class));

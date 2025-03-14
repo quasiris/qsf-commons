@@ -4,7 +4,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.*;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.document.*;
 import java.io.IOException;
 import java.io.StringReader;
@@ -22,24 +22,22 @@ public class TextSimilarity {
     }
 
     public Map<String, Double> computeTFIDF(String text) throws IOException {
-        RAMDirectory ramDirectory = new RAMDirectory();
+        ByteBuffersDirectory directory = new ByteBuffersDirectory();  // Use this instead of RAMDirectory
         IndexWriterConfig config = new IndexWriterConfig(new SimpleAnalyzer());
-        IndexWriter writer = new IndexWriter(ramDirectory, config);
+        IndexWriter writer = new IndexWriter(directory, config);
 
-        // Index the single document
         Document luceneDoc = new Document();
         luceneDoc.add(new TextField("content", text, Field.Store.YES));
         writer.addDocument(luceneDoc);
         writer.close();
 
-        // Compute TF-IDF for this document
-        IndexReader reader = DirectoryReader.open(ramDirectory);
+        IndexReader reader = DirectoryReader.open(directory);
         Map<String, Integer> termFreq = tokenize(text);
         Map<String, Double> tfidf = new HashMap<>();
 
         for (String term : termFreq.keySet()) {
             int docFreq = reader.docFreq(new Term("content", term));
-            double idf = Math.log((double) reader.numDocs() / (docFreq + 1)) + 1; // IDF formula
+            double idf = Math.log((double) reader.numDocs() / (docFreq + 1)) + 1;
             double tfidfScore = termFreq.get(term) * idf;
             tfidf.put(term, tfidfScore);
         }

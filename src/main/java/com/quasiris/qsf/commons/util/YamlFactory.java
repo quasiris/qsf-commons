@@ -1,6 +1,7 @@
 package com.quasiris.qsf.commons.util;
 
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -31,7 +32,7 @@ public class YamlFactory {
             String yamlText = MustacheUtil.compileMustache(reader, vars);
 
             DumperOptions options = createYamlOptions();
-            Yaml yaml = new Yaml(options);
+            Yaml yaml = new Yaml(createAllowAllLoadOptions(), options);
             Iterable<Object> objects = yaml.loadAll(yamlText);
             yamlObjects = new ArrayList<>();
             for(Object obj : objects) {
@@ -53,9 +54,15 @@ public class YamlFactory {
         return options;
     }
 
+    public static LoaderOptions createAllowAllLoadOptions() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setTagInspector(tag -> true);
+        return loaderOptions;
+    }
+
     public static <T> String serialize(T obj) {
         DumperOptions options = createYamlOptions();
-        Yaml yaml = new Yaml(options);
+        Yaml yaml = new Yaml(createAllowAllLoadOptions(), options);
         String output = yaml.dump(obj);
         return output;
     }

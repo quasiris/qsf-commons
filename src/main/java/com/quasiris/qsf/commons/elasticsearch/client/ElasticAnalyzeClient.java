@@ -31,20 +31,28 @@ public class ElasticAnalyzeClient {
     }
 
     public HttpResponse<Map> analyze(String baseUrl, String text, @Nullable Object charFilters, @Nullable Object tokenizer, @Nullable Object filters) {
-        String apiUrl = baseUrl+"/_analyze";
+        return analyze(baseUrl, text, charFilters, tokenizer, filters, false);
+    }
 
-        Map<String, Object> params = new HashMap();
-        if(charFilters != null) {
+    public HttpResponse<Map> analyze(String baseUrl, String text, @Nullable Object charFilters, @Nullable Object tokenizer, @Nullable Object filters, boolean explain) {
+        String apiUrl = baseUrl + "/_analyze";
+
+        Map<String, Object> params = new HashMap<>();
+        if (charFilters != null) {
             params.put("char_filter", charFilters);
         }
-        if(tokenizer != null) {
+        if (tokenizer != null) {
             params.put("tokenizer", tokenizer);
         }
-        if(filters != null) {
+        if (filters != null) {
             params.put("filter", filters);
         }
         params.put("text", text);
-        HttpResponse<Map> httpResponse = null;
+        if (explain) {
+            params.put("explain", explain);
+        }
+
+        HttpResponse<Map> httpResponse;
         try (DefaultHttpClient restClient = new DefaultHttpClient()) {
             httpResponse = restClient.postForResponse(apiUrl, params, castTypeReference(Map.class));
         } catch (Exception e) {

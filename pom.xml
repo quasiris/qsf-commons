@@ -3,7 +3,7 @@
     <groupId>com.quasiris.qsf</groupId>
     <artifactId>qsf-commons</artifactId>
     <packaging>jar</packaging>
-    <version>7.4.0-SNAPSHOT</version>
+    <version>7.6-SNAPSHOT</version>
     <name>qsf-commons</name>
     <url>https://www.quasiris.de/de/quasiris-search-cloud/</url>
     <description>Quasiris Search Framework commons library</description>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.quasiris.qsf</groupId>
             <artifactId>qsf-dto</artifactId>
-            <version>7.2.0</version>
+            <version>7.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

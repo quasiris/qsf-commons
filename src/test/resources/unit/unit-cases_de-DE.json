@@ -1,0 +1,68 @@
+[
+  {
+    "given": "55 cm",
+    "toSortableStringWithOriginalUnit": "00000000000550.0 cm",
+    "formatted": "55 cm"
+  },
+  {
+    "given": "55.5 cm",
+    "toSortableStringWithOriginalUnit": "00000000000555.0 cm",
+    "formatted": "55,5 cm"
+  },
+  {
+    "given": "1.2 m",
+    "toSortableStringWithOriginalUnit": "00000000001200.0 m",
+    "formatted": "1,2 m"
+  },
+  {
+    "given": "0.5 kg",
+    "toSortableStringWithOriginalUnit": "00000000000500.0 kg",
+    "formatted": "0,5 kg",
+    "autoFormatted": "500 g"
+  },
+  {
+    "given": "2.5 t",
+    "toSortableStringWithOriginalUnit": "00000002500000.0 t",
+    "formatted": "2,5 t"
+  },
+  {
+    "given": "2 zoll",
+    "toSortableStringWithOriginalUnit": "00000000000050.8 zoll",
+    "formatted": "2 zoll",
+    "autoFormatted": "5,1 cm"
+  },
+  {
+    "given": "16 bit",
+    "toSortableStringWithOriginalUnit": "00000000000002.0 bit",
+    "formatted": "16 bit",
+    "autoFormatted": "2 B"
+  },
+  {
+    "given": "1 GB",
+    "toSortableStringWithOriginalUnit": "00001073742000.0 GB",
+    "formatted": "1 GB"
+  },
+  {
+    "given": "1024.0 MB",
+    "toSortableStringWithOriginalUnit": "00001073742000.0 MB",
+    "formatted": "1.024 MB",
+    "autoFormatted": "1 GB"
+  },
+  {
+    "given": "0.128 GB",
+    "toSortableStringWithOriginalUnit": "00000137439000.0 GB",
+    "formatted": "0,13 GB",
+    "autoFormatted" : "131,07 MB"
+  },
+  {
+    "given": "5 GB",
+    "toSortableStringWithOriginalUnit": "00005368709000.0 GB",
+    "formatted": "5 GB"
+  },
+  {
+    "given": "0.5 TB",
+    "toSortableStringWithOriginalUnit": "00549755800000.0 TB",
+    "formatted": "0,5 TB",
+    "autoFormatted" : "512 GB"
+  }
+]

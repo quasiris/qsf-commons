@@ -1,5 +1,7 @@
 package com.quasiris.qsf.commons.unit;
 
+import com.quasiris.qsf.commons.util.BigDecimalUtils;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -22,6 +24,10 @@ public class UnitTranslator {
         if (baseUnit != null && value != null) {
             this.baseValue = value.multiply(baseUnit.getValue()).round(MathContext.DECIMAL32);
         }
+    }
+
+    public UnitTranslator(String unit, Object value) {
+        this(unit, BigDecimalUtils.toBigDecimal(value));
     }
 
     public UnitTranslator(String unit) {

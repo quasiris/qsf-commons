@@ -1,7 +1,8 @@
 [
   {
-    "given": "0.5 kg",
-    "toSortableStringWithOriginalUnit": "00000000000500.0 kg",
-    "formatted": "0.5 kg"
+    "displayName" : "format 55cm to 55cm",
+    "given": "55 cm",
+    "toSortableStringWithOriginalUnit": "00000000000550.0 cm",
+    "formatted": "55 cm"
   }
 ]

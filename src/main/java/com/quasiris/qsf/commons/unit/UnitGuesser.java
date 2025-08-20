@@ -105,11 +105,11 @@ public final class UnitGuesser {
     // -------- Default rule sets --------
     static {
         // Length, base "m"
-        registerRules("m", List.of(
-            Rule.of("km", "1000"),
-            Rule.of("m",  "1"),
-            Rule.of("cm", "0.01"),
-            Rule.of("mm", "0")
+        registerRules("mm", List.of(
+                Rule.of("km", "1000000"), // 1 km = 1,000,000 mm
+                Rule.of("m",  "1000"),    // 1 m  = 1000 mm
+                Rule.of("cm", "10"),      // 1 cm = 10 mm
+                Rule.of("mm", "1")        // 1 mm = 1 mm
         ));
 
         // Weight, base "g"

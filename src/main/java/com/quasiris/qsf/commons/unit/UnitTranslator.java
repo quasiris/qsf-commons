@@ -35,7 +35,7 @@ public class UnitTranslator {
         baseUnit = unitMapping.get(unit.toLowerCase());
     }
 
-    private SimpleEntry<String, BigDecimal> getUnit(String unit) {
+    private static SimpleEntry<String, BigDecimal> getUnit(String unit) {
         return unitMapping.get(unit.toLowerCase());
     }
 
@@ -73,16 +73,13 @@ public class UnitTranslator {
      * @param zeroPadInteger number of digits for the integer part (zero-padded)
      * @param decimals number of fractional digits (fixed-width)
      */
-    public String toSortableStringWithOriginalUnit(int zeroPadInteger, int decimals) {
+    public String toSortableString(int zeroPadInteger, int decimals, String unitLabel) {
         if (!hasUnit() || baseValue == null) {
             throw new IllegalStateException("No unit/value set.");
         }
 
-        // pick sortable numeric unit by base (ensures lexical == numeric order)
-        String sortableNumericUnit = chooseSortableUnitForBase(getBaseUnit());
-
         // convert baseValue to that sortable numeric unit
-        BigDecimal numeric = getValueForUnit(sortableNumericUnit);
+        BigDecimal numeric = getValueForUnit(baseUnit.getKey());
 
         // round to fixed decimals
         BigDecimal scaled = numeric.setScale(decimals, RoundingMode.HALF_UP);
@@ -116,41 +113,34 @@ public class UnitTranslator {
             }
         }
 
-        // IMPORTANT: append *original* unit label as requested
-        String unitLabel = (originalUnit == null) ? "" : originalUnit;
-
         return decimals > 0
                 ? sign + paddedInt + "." + fracPart + " " + unitLabel
                 : sign + paddedInt + " " + unitLabel;
     }
 
-    /**
-     * Choose a numeric unit that yields integral-ish magnitudes for stable lexicographic sorting.
-     * Base "m" -> "mm", "g" -> "g", "B" -> "B", "s" -> "s"
-     */
-    private String chooseSortableUnitForBase(String base) {
-        if (base == null) return null;
-        String b = base.toLowerCase(Locale.ROOT);
-        switch (b) {
-            case "m":  return "mm";
-            case "g":  return "g";
-            case "b":  return "b"; // key used in your map; label choice is separate
-            case "s":  return "s";
-            default:   return base;
+    public static UnitTranslator fromSortableStringWithOriginalUnit(String value) {
+        if(value == null) {
+            return null;
         }
+        String[] parts = value.trim().split(" ");
+        Unit unit = new Unit(parts[0], parts[1]);
+        String baseUnit = getUnit(unit.getUnit()).getKey();
+
+        UnitTranslator unitTranslator = new UnitTranslator(baseUnit, new BigDecimal(unit.getNumber()));
+        unitTranslator.originalUnit = unit.getUnit();
+        return unitTranslator;
     }
 
     // ---------------- your existing unitMapping (unchanged) ----------------
     private static HashMap<String, SimpleEntry<String, BigDecimal>> unitMapping = new HashMap<>();
     static {
-        // ... keep your entire mapping as-is ...
-        unitMapping.put("cm", new SimpleEntry<>("m", new BigDecimal(0.01)));
-        unitMapping.put("mm", new SimpleEntry<>("m", new BigDecimal(0.001)));
-        unitMapping.put("m", new SimpleEntry<>("m", new BigDecimal(1)));
-        unitMapping.put("meter", new SimpleEntry<>("m", new BigDecimal(1)));
-        unitMapping.put("dm", new SimpleEntry<>("m", new BigDecimal(0.1)));
-        unitMapping.put("km", new SimpleEntry<>("m", new BigDecimal(1000)));
-        unitMapping.put("zoll", new SimpleEntry<>("m", new BigDecimal(0.0254)));
+        unitMapping.put("mm", new SimpleEntry<>("mm", new BigDecimal(1)));
+        unitMapping.put("cm", new SimpleEntry<>("mm", new BigDecimal(10)));
+        unitMapping.put("dm", new SimpleEntry<>("mm", new BigDecimal(100)));
+        unitMapping.put("m", new SimpleEntry<>("mm", new BigDecimal(1000)));
+        unitMapping.put("meter", new SimpleEntry<>("mm", new BigDecimal(1000)));
+        unitMapping.put("km", new SimpleEntry<>("mm", new BigDecimal(1_000_000)));
+        unitMapping.put("zoll", new SimpleEntry<>("mm", new BigDecimal("25.4")));
 
         unitMapping.put("ml", new SimpleEntry<>("L", new BigDecimal(0.001)));
         unitMapping.put("l", new SimpleEntry<>("L", new BigDecimal(1)));
@@ -263,6 +253,14 @@ public class UnitTranslator {
         unitMapping.put("lux", new SimpleEntry<>("Lux", new BigDecimal(1)));
 
         unitMapping.put("none", new SimpleEntry<>("none", new BigDecimal(1)));
+    }
+
+    public String getOriginalUnit() {
+        return originalUnit;
+    }
+
+    public void setOriginalUnit(String originalUnit) {
+        this.originalUnit = originalUnit;
     }
 
     // ---------------- your existing expand() (unchanged) ----------------

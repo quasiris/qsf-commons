@@ -147,11 +147,22 @@ public final class UnitDisplayFormatter {
         return format(value, unit, locale, DEFAULT_ROUNDING);
     }
 
+    public static String pattern(String unit) {
+        return UNIT_PATTERNS.getOrDefault(unit.toLowerCase(Locale.ROOT), DEFAULT_PATTERN);
+    }
+
     public static String format(BigDecimal value, String unit, Locale locale, RoundingMode rounding) {
         if (value == null || unit == null) {
             throw new IllegalArgumentException("value and unit must not be null");
         }
-        String pattern = UNIT_PATTERNS.getOrDefault(unit.toLowerCase(Locale.ROOT), DEFAULT_PATTERN);
+        String pattern = pattern(unit);
+        return format(value, unit, locale, rounding, pattern);
+    }
+
+    public static String format(BigDecimal value, String unit, Locale locale, RoundingMode rounding, String pattern) {
+        if (value == null || unit == null) {
+            throw new IllegalArgumentException("value and unit must not be null");
+        }
         DecimalFormat df = new DecimalFormat(pattern, DecimalFormatSymbols.getInstance(locale));
         df.setRoundingMode(rounding);
         return df.format(value) + " " + unit; // preserve given casing

@@ -4,6 +4,14 @@ public class Unit {
     private String number;
     private String unit;
 
+    public Unit() {
+    }
+
+    public Unit(String number, String unit) {
+        this.number = number;
+        this.unit = unit;
+    }
+
     /**
      * Getter for property 'number'.
      *

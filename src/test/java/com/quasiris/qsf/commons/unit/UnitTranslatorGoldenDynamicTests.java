@@ -67,11 +67,14 @@ class UnitTranslatorGoldenDynamicTests {
 
                     UnitTranslator t = new UnitTranslator(unit, value);
 
-                    String actualSortable = t.toSortableStringWithOriginalUnit(PAD, DECIMALS);
+                    String actualSortable = t.toSortableString(PAD, DECIMALS, u.getUnit());
                     assertEquals(c.toSortableStringWithOriginalUnit, actualSortable,
                             () -> "toSortable mismatch in " + resource + " for " + c.given);
 
-                    String actualFormatted = UnitDisplayFormatter.format(value, unit, locale);
+
+                    UnitTranslator tSorted = UnitTranslator.fromSortableStringWithOriginalUnit(actualSortable);
+
+                    String actualFormatted = UnitDisplayFormatter.format(tSorted.getValueForUnit(unit), unit, locale);
                     assertEquals(c.formatted, actualFormatted,
                             () -> "formatted mismatch in " + resource + " for " + c.given);
 

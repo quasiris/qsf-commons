@@ -17,11 +17,11 @@ class UnitGuesserTest {
     @Test
     @DisplayName("Length defaults (base = m)")
     void length_defaults() {
-        assertEquals("km", UnitGuesser.guessUnit("m", new BigDecimal("12345")));
-        assertEquals("m",  UnitGuesser.guessUnit("m", new BigDecimal("12")));
-        assertEquals("cm", UnitGuesser.guessUnit("m", new BigDecimal("0.055")));
-        assertEquals("mm", UnitGuesser.guessUnit("m", new BigDecimal("0.0008")));
-        assertEquals("mm", UnitGuesser.guessUnit("m", BigDecimal.ZERO));
+        assertEquals("km", UnitGuesser.guessUnit("mm", new BigDecimal("12345000")));
+        assertEquals("m",  UnitGuesser.guessUnit("mm", new BigDecimal("12000")));
+        assertEquals("cm", UnitGuesser.guessUnit("mm", new BigDecimal("55.0")));
+        assertEquals("mm", UnitGuesser.guessUnit("mm", new BigDecimal("8.00")));
+        assertEquals("mm", UnitGuesser.guessUnit("mm", BigDecimal.ZERO));
         assertEquals("llm", UnitGuesser.guessUnit("llm", BigDecimal.ZERO));
     }
 
@@ -74,9 +74,9 @@ class UnitGuesserTest {
     @DisplayName("Exact thresholds choose the larger unit (>= rule)")
     void thresholds_exact() {
         // length
-        assertEquals("km", UnitGuesser.guessUnit("m", new BigDecimal("1000")));  // 1000 m = 1 km
-        assertEquals("m",  UnitGuesser.guessUnit("m", new BigDecimal("1")));     // 1 m
-        assertEquals("cm", UnitGuesser.guessUnit("m", new BigDecimal("0.01")));  // 1 cm
+        assertEquals("km", UnitGuesser.guessUnit("mm", new BigDecimal("1000000")));  // 1000 m = 1 km
+        assertEquals("m",  UnitGuesser.guessUnit("mm", new BigDecimal("1000")));     // 1 m
+        assertEquals("cm", UnitGuesser.guessUnit("mm", new BigDecimal("100.00")));  // 1 cm
         // data
         assertEquals("KB", UnitGuesser.guessUnit("B", new BigDecimal("1024")));      // 1 KB
         assertEquals("MB", UnitGuesser.guessUnit("B", new BigDecimal("1048576")));   // 1 MB
@@ -89,7 +89,7 @@ class UnitGuesserTest {
         assertEquals("kg", UnitGuesser.guessUnit("g", new BigDecimal("-1500")));
         assertEquals("KB", UnitGuesser.guessUnit("B", new BigDecimal("-2048")));
         assertEquals("h",  UnitGuesser.guessUnit("s", new BigDecimal("-7200")));
-        assertEquals("cm", UnitGuesser.guessUnit("m", new BigDecimal("-0.02")));
+        assertEquals("cm", UnitGuesser.guessUnit("mm", new BigDecimal("-20.00")));
     }
 
     @Test
@@ -111,27 +111,30 @@ class UnitGuesserTest {
     }
 
     @Test
-    @DisplayName("addRule: insert a mid-range unit without breaking others (restore afterwards)")
-    void addRule_insertBetween_then_restore() throws Exception {
-        // Snapshot original "m" rules via reflection so we can restore them
+    @DisplayName("addRule (base=mm): insert a mid-range unit without breaking others (restore afterwards)")
+    void addRule_insertBetween_then_restore_mm() throws Exception {
+        // Snapshot original "mm" rules via reflection so we can restore them
         @SuppressWarnings("unchecked")
         Map<String, List<UnitGuesser.Rule>> rulesMap =
                 (Map<String, List<UnitGuesser.Rule>>) getStaticField(UnitGuesser.class, "RULES");
-        List<UnitGuesser.Rule> originalM = new ArrayList<>(rulesMap.get("m"));
+        List<UnitGuesser.Rule> originalMm = new ArrayList<>(rulesMap.get("mm"));
 
         try {
-            // Insert decimeters (dm) between m (>=1) and cm (>=0.01)
-            UnitGuesser.addRule("m", new UnitGuesser.Rule("dm", new BigDecimal("0.1")));
-            // Now 0.2 m should select "dm"
-            assertEquals("dm", UnitGuesser.guessUnit("m", new BigDecimal("0.2")));
+            // Insert decimeters (dm) between m (>=1000) and cm (>=10) in base=mm
+            UnitGuesser.addRule("mm", new UnitGuesser.Rule("dm", new BigDecimal("100")));
+
+            // Now 200 mm should select "dm"
+            assertEquals("dm", UnitGuesser.guessUnit("mm", new BigDecimal("200")));
+
             // Still respects existing thresholds above/below
-            assertEquals("m",  UnitGuesser.guessUnit("m", new BigDecimal("1.0")));
-            assertEquals("cm", UnitGuesser.guessUnit("m", new BigDecimal("0.05")));
+            assertEquals("m",  UnitGuesser.guessUnit("mm", new BigDecimal("1000"))); // 1 m
+            assertEquals("cm", UnitGuesser.guessUnit("mm", new BigDecimal("50")));   // 5 cm
         } finally {
-            // Restore original rules for "m" to avoid cross-test interference
-            UnitGuesser.registerRules("m", originalM);
+            // Restore original rules for "mm" to avoid cross-test interference
+            UnitGuesser.registerRules("mm", originalMm);
         }
     }
+
 
     // -------- helper (reflection) --------
     private static Object getStaticField(Class<?> clazz, String fieldName) throws Exception {

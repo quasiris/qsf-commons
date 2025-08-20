@@ -34,11 +34,11 @@ class UnitGuesserTest {
     @Test
     @DisplayName("Weight defaults (base = g)")
     void weight_defaults() {
-        assertEquals("t",  UnitGuesser.guessUnit("g", new BigDecimal("2000000")));
-        assertEquals("kg", UnitGuesser.guessUnit("g", new BigDecimal("1000")));
-        assertEquals("g",  UnitGuesser.guessUnit("g", new BigDecimal("1")));
-        assertEquals("mg", UnitGuesser.guessUnit("g", new BigDecimal("0.5")));
-        assertEquals("mg", UnitGuesser.guessUnit("g", BigDecimal.ZERO));
+        assertEquals("t",  UnitGuesser.guessUnit("mg", new BigDecimal("2000000000")));
+        assertEquals("kg", UnitGuesser.guessUnit("mg", new BigDecimal("1000000")));
+        assertEquals("g",  UnitGuesser.guessUnit("mg", new BigDecimal("1000")));
+        assertEquals("mg", UnitGuesser.guessUnit("mg", new BigDecimal("500")));
+        assertEquals("mg", UnitGuesser.guessUnit("mg", BigDecimal.ZERO));
     }
 
     @Test
@@ -86,7 +86,7 @@ class UnitGuesserTest {
     @Test
     @DisplayName("Negatives use absolute value for unit selection")
     void negatives_use_abs() {
-        assertEquals("kg", UnitGuesser.guessUnit("g", new BigDecimal("-1500")));
+        assertEquals("kg", UnitGuesser.guessUnit("mg", new BigDecimal("-1500000")));
         assertEquals("KB", UnitGuesser.guessUnit("B", new BigDecimal("-2048")));
         assertEquals("h",  UnitGuesser.guessUnit("s", new BigDecimal("-7200")));
         assertEquals("cm", UnitGuesser.guessUnit("mm", new BigDecimal("-20.00")));

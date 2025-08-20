@@ -152,13 +152,13 @@ public class UnitTranslator {
         unitMapping.put("kw", new SimpleEntry<>("W", new BigDecimal(1000)));
         unitMapping.put("watt", new SimpleEntry<>("W", new BigDecimal(1)));
 
-        unitMapping.put("g", new SimpleEntry<>("g", new BigDecimal(1)));
-        unitMapping.put("mg", new SimpleEntry<>("g", new BigDecimal(0.001)));
-        unitMapping.put("kg", new SimpleEntry<>("g", new BigDecimal(1000)));
-        unitMapping.put("kilo", new SimpleEntry<>("g", new BigDecimal(1000)));
-        unitMapping.put("gramm", new SimpleEntry<>("g", new BigDecimal(1)));
-        unitMapping.put("t", new SimpleEntry<>("g", new BigDecimal(1000_000)));
-        unitMapping.put("tonne", new SimpleEntry<>("g", new BigDecimal(1000_000)));
+        unitMapping.put("g", new SimpleEntry<>("mg", new BigDecimal(1000)));
+        unitMapping.put("mg", new SimpleEntry<>("mg", new BigDecimal(1)));
+        unitMapping.put("kg", new SimpleEntry<>("mg", new BigDecimal(1000_000)));
+        unitMapping.put("kilo", new SimpleEntry<>("mg", new BigDecimal(1000_000)));
+        unitMapping.put("gramm", new SimpleEntry<>("mg", new BigDecimal(1000)));
+        unitMapping.put("t", new SimpleEntry<>("mg", new BigDecimal(1000_000_000)));
+        unitMapping.put("tonne", new SimpleEntry<>("mg", new BigDecimal(1000_000_000)));
 
         unitMapping.put("dpi", new SimpleEntry<>("dpi", new BigDecimal(1)));
 
@@ -232,8 +232,8 @@ public class UnitTranslator {
         unitMapping.put("bilder/s", new SimpleEntry<>("fps", new BigDecimal(1)));
         unitMapping.put("fps", new SimpleEntry<>("fps", new BigDecimal(1)));
 
-        unitMapping.put("mah", new SimpleEntry<>("Ah", new BigDecimal(0.001)));
-        unitMapping.put("ah", new SimpleEntry<>("Ah", new BigDecimal(1)));
+        unitMapping.put("mah", new SimpleEntry<>("mAh", new BigDecimal(1)));
+        unitMapping.put("ah", new SimpleEntry<>("Ah", new BigDecimal(1000)));
 
         unitMapping.put("grad", new SimpleEntry<>("°C", new BigDecimal(1)));
         unitMapping.put("°c", new SimpleEntry<>("°C", new BigDecimal(1)));

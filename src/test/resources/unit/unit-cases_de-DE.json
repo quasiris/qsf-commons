@@ -16,13 +16,13 @@
   },
   {
     "given": "0.5 kg",
-    "toSortableStringWithOriginalUnit": "00000000000500.0 kg",
+    "toSortableStringWithOriginalUnit": "00000000500000.0 kg",
     "formatted": "0,5 kg",
     "autoFormatted": "500 g"
   },
   {
     "given": "2.5 t",
-    "toSortableStringWithOriginalUnit": "00000002500000.0 t",
+    "toSortableStringWithOriginalUnit": "00002500000000.0 t",
     "formatted": "2,5 t"
   },
   {

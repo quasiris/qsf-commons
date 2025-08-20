@@ -113,11 +113,11 @@ public final class UnitGuesser {
         ));
 
         // Weight, base "g"
-        registerRules("g", List.of(
-            Rule.of("t",  "1000000"),
-            Rule.of("kg", "1000"),
-            Rule.of("g",  "1"),
-            Rule.of("mg", "0")
+        registerRules("mg", List.of(
+            Rule.of("t",  "1000000000"),
+            Rule.of("kg", "1000000"),
+            Rule.of("g",  "1000"),
+            Rule.of("mg", "1")
         ));
 
         // Data size, base "B" (binary multiples)

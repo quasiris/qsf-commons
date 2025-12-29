@@ -4,18 +4,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.quasiris.qsf.commons.aws.http.AwsCredentialsHelper;
 import com.quasiris.qsf.commons.aws.http.AwsRequestSigner;
 import com.quasiris.qsf.commons.http.java.JavaHttpClient;
+import com.quasiris.qsf.commons.http.java.exception.HttpClientStatusException;
 import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadItem;
 import com.quasiris.qsf.commons.http.java.model.multipart.MultipartUploadRequest;
 import com.quasiris.qsf.commons.repo.config.*;
 import com.quasiris.qsf.commons.util.HttpUtil;
 import com.quasiris.qsf.commons.util.IOUtils;
+import com.quasiris.qsf.commons.util.model.Holder;
 import com.quasiris.qsf.dto.http.aws.AwsCredentialsValue;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,15 +41,45 @@ public class ModelRepositoryManager {
     private String groupId;
     private String artifactId;
     private String version;
+    private String locale;
 
     private ModelRepositoryConfig config;
 
     protected String getModelName() {
-        return artifactId + "-" + version;
+        return getModelName(locale);
+    }
+
+    private String addLocaleSuffix() {
+        return addLocaleSuffix(locale);
     }
 
     protected String getUrlZipFile() {
-        return getUrlPath() + getModelName() + ".zip";
+        return getUrlZipFile(locale);
+    }
+
+    private String getUrlZipFile(String inputLocale) {
+        return getUrlPath(inputLocale) + getModelName(inputLocale) + ".zip";
+    }
+
+    private String getUrlPath(String inputLocale) {
+        StringBuilder groupIdPath = new StringBuilder(groupId.replaceAll(Pattern.quote("."), "/"));
+        groupIdPath.append("/");
+        groupIdPath.append(artifactId).append(addLocaleSuffix(inputLocale));
+        groupIdPath.append("/");
+        groupIdPath.append(version);
+        groupIdPath.append("/");
+        return groupIdPath.toString();
+    }
+
+    private String getModelName(String inputLocale) {
+        return artifactId + addLocaleSuffix(inputLocale) + "-" + version;
+    }
+
+    private String addLocaleSuffix(String inputLocale) {
+        if (inputLocale != null) {
+            return "-" + inputLocale;
+        }
+        return "";
     }
 
     public static String resolvePath(String modelname, String path) {
@@ -74,13 +108,7 @@ public class ModelRepositoryManager {
     }
 
     protected String getUrlPath() {
-        StringBuilder groupIdPath = new StringBuilder(groupId.replaceAll(Pattern.quote("."), "/"));
-        groupIdPath.append("/");
-        groupIdPath.append(artifactId);
-        groupIdPath.append("/");
-        groupIdPath.append(version);
-        groupIdPath.append("/");
-        return groupIdPath.toString();
+        return getUrlPath(locale);
     }
 
 
@@ -153,7 +181,18 @@ public class ModelRepositoryManager {
     }
 
     public String getAbsoluteModelFile() {
-        return getConfig().getModelBasePath() + getUrlPath()  + getModelName() + "/";
+        return getAbsoluteModelFileByLocale(locale);
+    }
+
+    private String getAbsoluteModelFileByLocale(String inputLocale) {
+        return getConfig().getModelBasePath() + getUrlPath(inputLocale)  + getModelName(inputLocale) + "/";
+    }
+
+//    The problem is that we include model name as directory inside zip file
+//    When we extract it we always have the default name in file system
+//    Because of that we need to rename just the last part of directory
+    private String getAbsoluteModelFileEdgeCase(String inputLocale) {
+        return getConfig().getModelBasePath() + getUrlPath()  + getModelName(inputLocale) + "/";
     }
 
     public String getAbsoluteModelFile(String fileName) {
@@ -165,7 +204,7 @@ public class ModelRepositoryManager {
         StringBuilder uploadUrl = new StringBuilder(getConfig().getUploadBaseUrl());
         uploadUrl.append(groupId);
         uploadUrl.append("/");
-        uploadUrl.append(artifactId);
+        uploadUrl.append(artifactId).append(addLocaleSuffix());
         uploadUrl.append("/");
         uploadUrl.append(version);
 
@@ -194,43 +233,55 @@ public class ModelRepositoryManager {
         String path = getAbsoluteModelPath();
 
         IOUtils.createDirectoryIfNotExists(path);
-        String modelLocation = "undefined";
-
+        Holder<String> modelLocation = new Holder<>("undefined");
         try {
 
-            DownloadConfig downloadConfig = getConfig().getDownloadConfig();
-
-            if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
-                String modelUrl = downloadConfig.getAws().getBaseUrl() + getUrlZipFile();
-                modelLocation = modelUrl;
-                logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
-
-                AwsDownloadConfig aws = downloadConfig.getAws();
-                AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
-                Map<String, String> headers = AwsRequestSigner.signRequest(new URI(modelUrl),
-                        "GET",
-                        credentials,
-                        aws.getService(),
-                        aws.getRegion());
-                executeGetModels(modelUrl, headers);
-            } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
-                HttpDownloadConfig httpDownloadConfig = downloadConfig.getHttp();
-                String modelUrl = httpDownloadConfig.getBaseUrl() + getUrlZipFile();
-                modelLocation = modelUrl;
-                logger.info("Downloading model {} from url: {} to path: {} ", getModelName(), modelUrl, getZipFile());
-                Map<String, String> headers = new LinkedHashMap<>();
-                BasicAuth basic = httpDownloadConfig.getBasic();
-                if (basic != null) {
-                    headers.put("Authorization",
-                            HttpUtil.createBasicAuthHeaderValue(basic.getUsername(), basic.getPassword()));
+            try {
+                downloadBasedOnLocale(modelLocation, locale);
+            } catch (HttpClientStatusException ex){
+                if (ex.getHttpMetadata().getResponse().getStatusCode() == 404 && locale != null) {
+                    logger.info("Couldn't download model with locale {}, statusCode={}. Trying to download without locale...",
+                            locale, ex.getHttpMetadata().getResponse().getStatusCode());
+                    downloadBasedOnLocale(modelLocation, null);
+                } else {
+                    throw new RuntimeException(ex);
                 }
-                executeGetModels(modelUrl, headers);
             }
 
 
-            logger.info("Unzipping finished!");
+            logger.info("Finished downloading file to {}", path);
         } catch (Exception e) {
-            throw new RuntimeException("Something gone wrong while downloading model file from " + modelLocation, e);
+            throw new RuntimeException("Something gone wrong while downloading model file from " + modelLocation.value, e);
+        }
+    }
+
+    private void downloadBasedOnLocale(Holder<String> modelLocation, String inputLocale) throws URISyntaxException, IOException {
+        DownloadConfig downloadConfig = getConfig().getDownloadConfig();
+        if (DownloadConfig.AWS_TYPE.equals(downloadConfig.getType()) && downloadConfig.getAws() != null) {
+            String modelUrl = downloadConfig.getAws().getBaseUrl() + getUrlZipFile(inputLocale);
+            modelLocation.value = modelUrl;
+            logger.info("Downloading model {} from url: {} to path: {}", getModelName(), modelUrl, getZipFile());
+
+            AwsDownloadConfig aws = downloadConfig.getAws();
+            AwsCredentialsValue credentials = AwsCredentialsHelper.getCredentials(aws.getCredentials());
+            Map<String, String> headers = AwsRequestSigner.signRequest(new URI(modelUrl),
+                    "GET",
+                    credentials,
+                    aws.getService(),
+                    aws.getRegion());
+            executeGetModels(modelUrl, headers);
+        } else if (DownloadConfig.HTTP_TYPE.equals(downloadConfig.getType()) && downloadConfig.getHttp() != null) {
+            HttpDownloadConfig httpDownloadConfig = downloadConfig.getHttp();
+            String modelUrl = httpDownloadConfig.getBaseUrl() + getUrlZipFile(inputLocale);
+            modelLocation.value = modelUrl;
+            logger.info("Downloading model {} from url: {} to path: {}", getModelName(), modelUrl, getZipFile());
+            Map<String, String> headers = new LinkedHashMap<>();
+            BasicAuth basic = httpDownloadConfig.getBasic();
+            if (basic != null) {
+                headers.put("Authorization",
+                        HttpUtil.createBasicAuthHeaderValue(basic.getUsername(), basic.getPassword()));
+            }
+            executeGetModels(modelUrl, headers);
         }
     }
 
@@ -254,9 +305,34 @@ public class ModelRepositoryManager {
         try {
             logger.info("Unzipping downloaded file {}", zipFile);
             IOUtils.unzip(zipFile);
-            logger.info("Finished Unzipping file {}" , zipFile);
+            renameAfterUnzip();
+            logger.info("Finished Unzipping file {}", zipFile);
         } catch (IOException e) {
             throw new RuntimeException("Could not unzip file: " + zipFile, e);
+        }
+    }
+
+    private void renameAfterUnzip() throws IOException {
+        if (locale != null) {
+            String defaultAbsoluteModelFile = getAbsoluteModelFileEdgeCase(null);
+            File defaultLocaleDir = new File(defaultAbsoluteModelFile);
+            String finalAbsoluteModelFile = getAbsoluteModelFileEdgeCase(locale);
+            File finalLocaleDir = new File(finalAbsoluteModelFile);
+            if (defaultLocaleDir.exists() && (!finalLocaleDir.exists())) {
+                logger.info("Renaming directory to match name with locale, final path={}",
+                        finalAbsoluteModelFile);
+                try {
+                    Files.move(defaultLocaleDir.toPath(), finalLocaleDir.toPath());
+                } catch (Exception ex) {
+                    if (finalLocaleDir.exists()) {
+                        logger.warn("Couldn't rename directory {} to {}. Deleting final folder...", defaultAbsoluteModelFile,
+                                finalAbsoluteModelFile);
+                        FileUtils.deleteDirectory(finalLocaleDir);
+                    }
+                    throw new RuntimeException("Couldn't", ex);
+                }
+                logger.info("Renaming finished successfully. Final path={}", finalAbsoluteModelFile);
+            }
         }
     }
 
@@ -264,6 +340,7 @@ public class ModelRepositoryManager {
         private String groupId;
         private String artifactId;
         private String version;
+        private String locale;
 
         private ModelRepositoryConfig config;
 
@@ -304,6 +381,11 @@ public class ModelRepositoryManager {
             return this;
         }
 
+        public Builder locale(String locale) {
+            this.locale = locale;
+            return this;
+        }
+
         public Builder version(String version) {
             this.version = version;
             return this;
@@ -315,6 +397,7 @@ public class ModelRepositoryManager {
             modelRepositoryManager.setArtifactId(artifactId);
             modelRepositoryManager.setVersion(version);
             modelRepositoryManager.setConfig(config);
+            modelRepositoryManager.setLocale(locale);
             return modelRepositoryManager;
         }
     }
@@ -353,6 +436,14 @@ public class ModelRepositoryManager {
      */
     public void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 
     /**

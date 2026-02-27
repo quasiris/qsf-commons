@@ -193,7 +193,7 @@ public class AwsRequestSigner {
                                           .map(e -> e.getKey() + ":" + e.getValue())
                                           .sorted()
                                           .reduce((f, s) -> f + "\n" + s).orElse("") + "\n";
-        String signedHeaders = headersToSign.keySet().stream().reduce((f, s) -> f + ";" + s).orElse("");
+        String signedHeaders = headersToSign.keySet().stream().sorted().reduce((f, s) -> f + ";" + s).orElse("");
         String canonicalRequest = method + "\n" + canonicalUri + "\n" + canonicalQueryString + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
         String credentialScope = dateStamp + "/" + region + "/" + service + "/" + "aws4_request";
         String stringToSign = algorithm + "\n" + amzDate + "\n" + credentialScope + "\n" + DigestUtils.sha256Hex(canonicalRequest);

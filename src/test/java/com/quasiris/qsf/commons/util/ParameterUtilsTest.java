@@ -334,4 +334,26 @@ public class ParameterUtilsTest {
             this.age = age;
         }
     }
+
+    @Test
+    public void testGetParameter_nullValueReturnsDefault() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", null);
+        params.put("age", null);
+        params.put("score", null);
+        params.put("active", null);
+
+        assertEquals("DefaultName", ParameterUtils.getParameter(params, "name", "DefaultName"));
+        assertEquals(7, ParameterUtils.getParameter(params, "age", 7));
+        assertEquals(1.5, ParameterUtils.getParameter(params, "score", 1.5));
+        assertEquals(Boolean.TRUE, ParameterUtils.getParameter(params, "active", Boolean.TRUE));
+    }
+
+    @Test
+    public void testGetParameter_nullParametersReturnsDefault() {
+        List<String> defaultValue = Arrays.asList("a");
+
+        assertEquals("DefaultName", ParameterUtils.getParameter(null, "name", "DefaultName"));
+        assertEquals(defaultValue, ParameterUtils.getParameter(null, "names", defaultValue, new TypeReference<List<String>>() {}));
+    }
 }

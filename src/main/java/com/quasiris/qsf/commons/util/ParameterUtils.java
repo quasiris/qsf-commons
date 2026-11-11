@@ -31,6 +31,9 @@ public class ParameterUtils {
 
     @SuppressWarnings("unchecked")
     public static <T> T getParameter(Map<String, Object> parameters, String key, T defaultValue, TypeReference<T> typeReference) {
+        if (parameters == null) {
+            return defaultValue;
+        }
         Object value = parameters.get(key);
         if (value != null) {
             if (typeReference.getType() instanceof Class && ((Class<?>) typeReference.getType()).isInstance(value)) {
@@ -44,11 +47,15 @@ public class ParameterUtils {
 
     @SuppressWarnings("unchecked")
     public static <T> T getParameter(Map<String, Object> parameters, String param, T defaultValue) {
-        if (parameters != null && parameters.containsKey(param)) {
-            Object value = parameters.get(param);
-            return attemptConversion(value, defaultValue);
+        if (parameters == null) {
+            return defaultValue;
         }
-        return defaultValue;
+        Object value = parameters.get(param);
+        if (value == null) {
+            // missing key or key with an explicit null value
+            return defaultValue;
+        }
+        return attemptConversion(value, defaultValue);
     }
 
     private static <T> T attemptConversion(Object value, T defaultValue) {
